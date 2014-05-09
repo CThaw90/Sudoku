@@ -17,7 +17,7 @@ public class TestRun {
      */
     public static void main(String[] args) {
         // TODO code application logic here
-        System.out.println("Hello World! How's it going?");
+        System.out.println("Hello World! From Eclispe");
     }
     
 }
