@@ -1,0 +1,5 @@
+# Ignored Files
+# ---------------
+/build/
+/nbproject/
+/dist/
