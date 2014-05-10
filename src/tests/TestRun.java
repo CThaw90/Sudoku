@@ -1,0 +1,27 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+package tests;
+
+import objects.*;
+
+/**
+ *
+ * @author cthaw
+ */
+public class TestRun {
+
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(String[] args) {
+        // TODO code application logic here
+        System.out.println("Hello World! From Eclispe");
+        SudokuBoard board = new SudokuBoard();
+    	board.displayBoard();
+    }
+    
+}
