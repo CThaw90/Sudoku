@@ -19,9 +19,10 @@ public class TestRun {
      */
     public static void main(String[] args) {
         // TODO code application logic here
-        System.out.println("Hello World! From Eclispe");
-        SudokuBoard board = new SudokuBoard();
-    	board.displayBoard();
+        System.out.println("Hello World!");
+        SudokuBoard board = new SudokuBoard(SudokuBoard.LARGE);
+        board.displayBorder();
+        board.displayBoard();
     }
     
 }
