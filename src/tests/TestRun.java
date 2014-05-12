@@ -20,8 +20,9 @@ public class TestRun {
     public static void main(String[] args) {
         // TODO code application logic here
         System.out.println("Hello World!");
-        SudokuBoard board = new SudokuBoard(SudokuBoard.SMALL);
-        board.displayBoard();
+        SudokuBoard board = new SudokuBoard(SudokuBoard.REGULAR);
+        board.displayGrid();
+        board.assertUnique(0);
     }
     
 }
