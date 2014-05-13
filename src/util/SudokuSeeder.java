@@ -64,7 +64,6 @@ public class SudokuSeeder {
 		board.setValue(8, 3, String.valueOf(6));
 		board.setValue(8, 5, String.valueOf(1));
 		board.setValue(8, 6, String.valueOf(7));
-		
 	}
 	
 	private static void Seedby4(SudokuBoard board) {

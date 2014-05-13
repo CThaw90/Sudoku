@@ -44,10 +44,10 @@ public class Solver {
 			return;
 		}
 
-		
 		extractCandidates();
 		
 		solved = (solved) ? solved : nakedSingleSolver();
+		solved = (solved) ? solved : nakedPairSolver();
 		
 		System.out.println(solved ? SOLVED : UNSOLVED);
 	}
@@ -95,6 +95,107 @@ public class Solver {
 		return solvable;
 	}
 	
+	private boolean nakedPairSolver() {
+		
+		for (int index=0; index < nakeds.size(); index++) {
+			NakedCandidates current = nakeds.get(index);
+			if (current.values.size() == 2) {
+				System.out.println("Possible Pair Candidate found at " + current.x + ", " + current.y);
+				checkForNakedPairs(current.x, current.y, index);
+			}
+		}
+		
+		return nakedSingleSolver();
+	}
+	
+	private void displayValues(String title, LinkedList<String> values) {
+		
+		System.out.println(title + ":");
+		for (int i=0; i < values.size(); i++) {
+			System.out.print(" " + values.get(i));
+		}
+		System.out.println();
+	}
+	
+	private int checkForNakedPairs(int x, int y, int i) {
+		
+		int pairIndex = -1;
+		
+		LinkedList<String> comparator = nakeds.get(i).values;
+		for (int index=i; index < nakeds.size() && pairIndex < 0; index++) {
+			NakedCandidates current = nakeds.get(index);
+			if (current.values.size() == 2 && index != i) {
+				System.out.println("Possible Match for ("+x+", "+y+") at ("+current.x+", "+current.y+")");
+				LinkedList<String> candidate = current.values;
+				pairIndex = (comparator.get(0) == candidate.get(0) &&
+							 comparator.get(1) == candidate.get(1)  ? index : -1);
+				
+				boolean removed = (pairIndex > -1) ? removeCandidatePairs(current, nakeds.get(i)) : false;
+				pairIndex = (removed ? pairIndex : -1);
+			}
+		}
+		
+		return pairIndex;
+	}
+	
+	private boolean removeCandidatePairs(NakedCandidates current, NakedCandidates comparator) {
+
+		boolean cp = (current.y == comparator.y ? true : false);
+		boolean rp = (current.x == comparator.x ? true : false);
+		boolean sp = sameSection(current, comparator);
+		boolean removed = false;
+		
+		System.out.println("Match Found for ("+current.x+", "+current.y+") at ("+comparator.x+", "+comparator.y+")");
+		for (int index=0; index < nakeds.size() && (sp || cp || rp); index++) {
+			
+			if (!nakeds.get(index).equals(current) && !nakeds.get(index).equals(comparator)) {
+				NakedCandidates naked = nakeds.get(index);
+				boolean d = false;
+				
+				if (rp && current.x == naked.x) {
+					d = deleteMatchingValues(current, naked);
+					removed = (removed ? removed : d);
+				}
+				
+				if (cp && current.y == naked.y) {
+					d = deleteMatchingValues(current, naked);
+					removed = (removed ? removed : d);
+				}
+				
+				if (sp && sameSection(current, naked)) {
+					d = deleteMatchingValues(current, naked);
+					removed = (removed ? removed : d);
+				}
+			}
+		}
+		
+		return removed;
+	}
+	
+	private boolean sameSection(NakedCandidates c1, NakedCandidates c2) {
+		
+		int s = board.size;
+		return Math.abs(c1.x-c2.x) < s && Math.abs(c1.y-c2.y) < s ? true : false;
+	}
+	
+	private boolean deleteMatchingValues(NakedCandidates comparator, NakedCandidates operator) {
+		boolean del = false;
+		
+		for (int i=0; i < comparator.values.size(); i++) {
+			int j=0;
+			while (j < operator.values.size()) {
+				
+				if (comparator.values.get(i).equals(operator.values.get(j))) {
+					operator.values.remove(j);
+					del = true;
+				}
+				else {j++;}
+			}
+		}
+		
+		return del;
+	}
+	
 	private void extractCandidates() {
 		if (nakeds != null)
 			System.out.println("Extracting Candidates from " + nakeds.size() + " coords");
@@ -127,5 +228,24 @@ public class Solver {
 				}
 			}
 		}
+	}
+	
+	private NakedCandidates getNaked(int x, int y) {
+		
+		NakedCandidates candidates = null;
+		
+		if (nakeds == null) {
+			System.out.println("No Candidates Stored!");
+			return candidate;
+		}
+		
+		for (int i=0; i < nakeds.size() && candidate == null; i++) {
+			NakedCandidates c = nakeds.get(i);
+			if (c.x == x && c.y == y) {
+				candidates = c;
+			}
+		}
+		
+		return candidates;
 	}
 }

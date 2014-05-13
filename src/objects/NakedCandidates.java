@@ -5,7 +5,7 @@ import java.util.LinkedList;
 public class NakedCandidates {
 
 	public LinkedList<String> values;
-	public int x, y, size;
+	public int x, y;
 	
 	public NakedCandidates(int size) {
 		values = new LinkedList<String>();
