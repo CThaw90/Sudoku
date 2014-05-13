@@ -1,5 +1,7 @@
 package objects;
 
+import util.SudokuSeeder;
+
 public class SudokuBoard {
 	
 	public static BoardSize SMALL = new BoardSize(2);
@@ -21,24 +23,15 @@ public class SudokuBoard {
 	
 	String[][] sudokuGrid;
 	int[][] boardGrid;
-	int size; 
+	public int size; 
 	
 	// Constructor creates Sudoku board with options of 4 static sizes
 	public SudokuBoard(BoardSize size) {
 		this.size = size.dimen;
 		boardGrid = new int[this.size*this.size][this.size*this.size];
 		sudokuGrid = new String[this.size*this.size][this.size*this.size];
-		
-		boardGrid[0][0] = 2;
-		boardGrid[0][1] = 3;
-		boardGrid[0][2] = 4;
-		
-	//	boardGrid[0][3] = 4;
+
 		initializeGrid();
-		
-		sudokuGrid[0][0] = String.valueOf(2);
-		sudokuGrid[0][1] = String.valueOf(3);
-		sudokuGrid[0][2] = String.valueOf(4);
 	}
 	
 	// Constructor creates normal 9x9 Sudoku Board
@@ -48,6 +41,8 @@ public class SudokuBoard {
 		size = 3;
 		
 		initializeGrid();
+		
+		SudokuSeeder.Seed(this);
 	}
 	
 	// Places a value at the corresponding board coordinate
@@ -110,6 +105,32 @@ public class SudokuBoard {
 		for (int i=0; i < sudokuGrid.length && !duplicate; i++) {
 			duplicate = (sudokuGrid[i][y].equals(entry) ? true : false);
 		}
+		return duplicate;
+	}
+	
+public boolean duplicateEntrySection(int x, int y, int entry) {
+		
+		boolean duplicate = false;
+		
+		int sx = (x/size)*size, sy = (y/size)*size;
+		for (int i=sx; i < sx+size; i++) {
+			for (int j=sy; j < sy+size; j++) {
+				duplicate = (boardGrid[i][j] == entry ? true : false);
+			}
+		}
+		return duplicate;
+	}
+	
+	public boolean duplicateEntrySection(int x, int y, String entry) {
+		
+		boolean duplicate = false;
+		int sx = (x/size)*size, sy = (y/size)*size;
+		for (int i=sx; i < sx+size && !duplicate; i++) {
+			for (int j=sy; j < sy+size && !duplicate; j++) {
+				duplicate = (sudokuGrid[i][j].equals(entry) ? true : false);
+			}
+		}
+		
 		return duplicate;
 	}
 	
@@ -273,6 +294,14 @@ public class SudokuBoard {
 		}
 		
 		System.out.println(C_TAIL);
+	}
+	
+	public int[][] currentBoardState() {
+		return boardGrid;
+	}
+	
+	public String[][] currentGridState() {
+		return sudokuGrid;
 	}
 	
 	/**

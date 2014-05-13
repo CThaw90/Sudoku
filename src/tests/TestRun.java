@@ -7,6 +7,7 @@
 package tests;
 
 import objects.*;
+import util.*;
 
 /**
  *
@@ -19,10 +20,15 @@ public class TestRun {
      */
     public static void main(String[] args) {
         // TODO code application logic here
-        System.out.println("Hello World!");
-        SudokuBoard board = new SudokuBoard(SudokuBoard.REGULAR);
+        SudokuBoard board = new SudokuBoard();
+        Solver solver = new Solver(board);
         board.displayGrid();
         board.assertUnique(0);
+        
+        solver.solve();
+        board.displayGrid();
+        solver.displayAllCandidates();
+    //    System.out.println(nakeds.values.get(2));
     }
     
 }

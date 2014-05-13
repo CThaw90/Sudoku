@@ -19,7 +19,6 @@ public class HashTable {
 		
 		boolean duplicates = false;
 		int iterations = intArray.length;
-		int[] checkArray = new int[intArray.length];
 		int i=0;
 		while (i < iterations && !duplicates) {
 			
