@@ -11,23 +11,23 @@ public class Solver {
 	static String SOLVED = new String("Puzzle Solved!");
 	public LinkedList<NakedCandidates> nakeds;
 	public NakedCandidates candidate;
-	String[][] sudokuGrid;
-	int[][] boardGrid;
+//	String[][] sudokuGrid;
+//	int[][] boardGrid;
 	SudokuBoard board;
 	boolean solved;
 	
 	public Solver() {}
 	
 	public Solver(SudokuBoard board) {
-		sudokuGrid = board.currentGridState();
-		boardGrid = board.currentBoardState();
+//		sudokuGrid = board.currentGridState();
+//		boardGrid = board.currentBoardState();
 		this.board = board;
 		solved = false;
 	}
 	
 	public void loadSudokuPuzzle(SudokuBoard board) {
-		sudokuGrid = board.currentGridState();
-		boardGrid = board.currentBoardState();
+//		sudokuGrid = board.currentGridState();
+//		boardGrid = board.currentBoardState();
 		this.board = board;
 		solved = false;
 	}
@@ -48,6 +48,7 @@ public class Solver {
 		
 		solved = (solved) ? solved : nakedSingleSolver();
 		solved = (solved) ? solved : nakedPairSolver();
+		solved = (solved) ? solved : nakedTripleSolver();
 		
 		System.out.println(solved ? SOLVED : UNSOLVED);
 	}
@@ -86,7 +87,6 @@ public class Solver {
 					board.setValue(candidate.x, candidate.y, candidate.values.get(0));
 					System.out.println("Setting Value " + candidate.values.getFirst() + " at " + candidate.x + ", " + candidate.y);
 					removeAffectedCandidates(candidate);
-				//	extractCandidates();
 					solvable = true;
 				} 
 				else { i++; }
@@ -237,6 +237,10 @@ public class Solver {
 		return removed;
 	}
 	
+	private boolean nakedTripleSolver() {
+		return nakedPairSolver();
+	}
+	
 	private boolean sameSection(NakedCandidates c1, NakedCandidates c2) {
 		int s = board.size;
 	//	return Math.abs(c1.x-c2.x) < board.size && Math.abs(c1.y-c2.y) < board.size ? true : false;
@@ -295,7 +299,7 @@ public class Solver {
 			}
 		}
 	}
-	
+/*
 	private NakedCandidates getNaked(int x, int y) {
 		
 		NakedCandidates candidates = null;
@@ -314,4 +318,5 @@ public class Solver {
 		
 		return candidates;
 	}
+*/
 }

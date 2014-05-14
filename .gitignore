@@ -1,5 +1,5 @@
 # Ignored Files
 # ---------------
 /build/
-/dist/
+/dist/*.txt
 *.class
