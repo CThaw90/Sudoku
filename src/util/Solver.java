@@ -96,21 +96,32 @@ public class Solver {
 	}
 	
 	private boolean nakedPairSolver() {
-		
+		LinkedList<Integer> values = new LinkedList<Integer>();
 		for (int index=0; index < nakeds.size(); index++) {
 			NakedCandidates current = nakeds.get(index);
-			if (current.values.size() == 2) {
+			if (current.values.size() == 2 && !passOver(values, index)) {
 				System.out.println("Possible Pair Candidate found at " + current.x + ", " + current.y);
-				checkForNakedPairs(current.x, current.y, index);
+				displayValues("Current Values", current.values);
+				int j = checkForNakedPairs(current.x, current.y, index);
+				values.add(j);
 			}
 		}
 		
 		return nakedSingleSolver();
 	}
 	
+	private boolean passOver(LinkedList<Integer> values, int value) {
+		
+		boolean passOver = false;
+		for (int index=0; index < values.size() && !passOver; index++) {
+			passOver = (values.get(index) == value ? true : false);
+		}
+		return passOver;
+	}
+	
 	private void displayValues(String title, LinkedList<String> values) {
 		
-		System.out.println(title + ":");
+		System.out.print(title + ":");
 		for (int i=0; i < values.size(); i++) {
 			System.out.print(" " + values.get(i));
 		}
@@ -127,10 +138,12 @@ public class Solver {
 			if (current.values.size() == 2 && index != i) {
 				System.out.println("Possible Match for ("+x+", "+y+") at ("+current.x+", "+current.y+")");
 				LinkedList<String> candidate = current.values;
-				pairIndex = (comparator.get(0) == candidate.get(0) &&
-							 comparator.get(1) == candidate.get(1)  ? index : -1);
+				displayValues("Current Values", comparator);
+				displayValues("Compare Values", candidate);
+				pairIndex = (comparator.get(0).equals(candidate.get(0)) &&
+							 comparator.get(1).equals(candidate.get(1)) ? index : -1);
 				
-				boolean removed = (pairIndex > -1) ? removeCandidatePairs(current, nakeds.get(i)) : false;
+				boolean removed = (pairIndex > -1) ? removeCandidatePairs(nakeds.get(i), current) : false;
 				pairIndex = (removed ? pairIndex : -1);
 			}
 		}
@@ -153,17 +166,29 @@ public class Solver {
 				boolean d = false;
 				
 				if (rp && current.x == naked.x) {
+					System.out.println("Potential match values in the same row at ("+naked.x+", "+naked.y+")");
+					displayValues("Current Values", current.values);
+					displayValues("Naked Values", naked.values);
 					d = deleteMatchingValues(current, naked);
+					displayValues("Result Values", naked.values);
 					removed = (removed ? removed : d);
 				}
 				
 				if (cp && current.y == naked.y) {
+					System.out.println("Potential match values in the same column at ("+naked.x+", "+naked.y+")");
+					displayValues("Current Values", current.values);
+					displayValues("Naked Values", naked.values);
 					d = deleteMatchingValues(current, naked);
+					displayValues("Result Values", naked.values);
 					removed = (removed ? removed : d);
 				}
 				
 				if (sp && sameSection(current, naked)) {
+					System.out.println("Potential match values in the same section at ("+naked.x+", "+naked.y+")");
+					displayValues("Current Values", current.values);
+					displayValues("Naked Values", naked.values);
 					d = deleteMatchingValues(current, naked);
+					displayValues("Result Values", naked.values);
 					removed = (removed ? removed : d);
 				}
 			}
@@ -179,13 +204,14 @@ public class Solver {
 	}
 	
 	private boolean deleteMatchingValues(NakedCandidates comparator, NakedCandidates operator) {
-		boolean del = false;
 		
+		boolean del = false;
 		for (int i=0; i < comparator.values.size(); i++) {
 			int j=0;
 			while (j < operator.values.size()) {
 				
 				if (comparator.values.get(i).equals(operator.values.get(j))) {
+					System.out.println("Removing value " + operator.values.get(j));
 					operator.values.remove(j);
 					del = true;
 				}
