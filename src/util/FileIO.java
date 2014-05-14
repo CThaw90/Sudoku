@@ -51,7 +51,6 @@ public class FileIO {
 		
 		String[] loadedData = null;
 		String[] parseFiles = pathLocation.split("\\.");
-		System.out.println("Contains . = " + pathLocation.contains("."));
 		
 		if (parseFiles.length == 2 && parseFiles[1].equals(new String("sudoku"))) {
 			loadedData = new String[1];

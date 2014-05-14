@@ -16,7 +16,7 @@ public class TestRun {
     	//Util sudoku = new Util(args);
        // SudokuBoard[] board = sudoku.createSudokuBoards();
     	FileIO io = new FileIO(args[0]);
-    	System.out.println("Sending arg " + args[0]);
+    //	System.out.println("Sending arg " + args[0]);
     //	io.loadPathLocation(args[0]);
     	String[] data = io.loadAllBoardData();
     	
