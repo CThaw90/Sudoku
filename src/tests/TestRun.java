@@ -27,7 +27,7 @@ public class TestRun {
         
         solver.solve();
         board.displayGrid();
-    //    solver.displayAllCandidates();
+        solver.displayAllCandidates();
     //    System.out.println(nakeds.values.get(2));
     }
     

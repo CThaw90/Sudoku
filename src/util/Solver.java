@@ -82,17 +82,57 @@ public class Solver {
 			while (i < nakeds.size()) {
 				NakedCandidates candidate = nakeds.get(i);
 				if (candidate.values.size() == 1) {
-
+					nakeds.remove(i);
 					board.setValue(candidate.x, candidate.y, candidate.values.get(0));
-					extractCandidates();
+					System.out.println("Setting Value " + candidate.values.getFirst() + " at " + candidate.x + ", " + candidate.y);
+					removeAffectedCandidates(candidate);
+				//	extractCandidates();
 					solvable = true;
-				//	nakeds.remove();
 				} 
 				else { i++; }
 			}
 		}
 		
 		return solvable;
+	}
+	
+	private void removeAffectedCandidates(NakedCandidates candidate) {
+		
+		System.out.println("Removing candidate at coordinate ("+candidate.x+", "+candidate.y+") with value " + candidate.values.get(0));
+		
+		int index=0;
+		while (index < nakeds.size()) {
+			NakedCandidates operator = nakeds.get(index);
+			
+			if (candidate.x == operator.x) {
+				System.out.println("Potential match values in the same row at ("+operator.x+", "+operator.y+")");
+				displayValues("Candidate Values", candidate.values);
+				displayValues("Operator Values", operator.values);
+				deleteMatchingValues(candidate, operator);
+				displayValues("Result Values", operator.values);
+			}
+			
+			else if (candidate.y == operator.y) {
+				System.out.println("Potential match values in the same column at ("+operator.x+", "+operator.y+")");
+				displayValues("Candidate Values", candidate.values);
+				displayValues("Operator Values", operator.values);
+				deleteMatchingValues(candidate, operator);
+				displayValues("Result Values", operator.values);
+			}
+			
+			if (sameSection(candidate, operator)) {
+				System.out.println("Potential match values in the same section at ("+operator.x+", "+operator.y+")");
+				displayValues("Candidate Values", candidate.values);
+				displayValues("Operator Values", operator.values);
+				deleteMatchingValues(candidate, operator);
+				displayValues("Result Values", operator.values);
+			}
+			
+			if (operator.values.size() == 0) {
+				nakeds.remove(index);
+			}
+			else { index++; }
+		}
 	}
 	
 	private boolean nakedPairSolver() {
@@ -198,9 +238,9 @@ public class Solver {
 	}
 	
 	private boolean sameSection(NakedCandidates c1, NakedCandidates c2) {
-		
 		int s = board.size;
-		return Math.abs(c1.x-c2.x) < s && Math.abs(c1.y-c2.y) < s ? true : false;
+	//	return Math.abs(c1.x-c2.x) < board.size && Math.abs(c1.y-c2.y) < board.size ? true : false;
+		return (c1.x/s)*s == (c2.x/s)*s && (c1.y/s)*s == (c2.y/s)*s;
 	}
 	
 	private boolean deleteMatchingValues(NakedCandidates comparator, NakedCandidates operator) {
@@ -211,7 +251,7 @@ public class Solver {
 			while (j < operator.values.size()) {
 				
 				if (comparator.values.get(i).equals(operator.values.get(j))) {
-					System.out.println("Removing value " + operator.values.get(j));
+					System.out.println("Removing value " + operator.values.get(j) + " at coordinate (" + operator.x + ", " + operator.y +")");
 					operator.values.remove(j);
 					del = true;
 				}
