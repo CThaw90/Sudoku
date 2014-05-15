@@ -7,7 +7,7 @@ import objects.SudokuBoard;
 
 public class Solver {
 	
-	static String UNSOLVED = new String("Puzzle could not be Solved!");
+	static String UNSOLVED = new String("No Solution for this Puzzle!");
 	static String SOLVED = new String("Puzzle Solved!");
 	public LinkedList<NakedCandidates> nakeds;
 	public NakedCandidates candidate;
@@ -39,6 +39,7 @@ public class Solver {
 		}
 
 		extractCandidates();
+	/* *
 		int iteration=0;
 		while (!solved && iteration < 2) {
 			solved = (solved) ? solved : nakedSingleSolver();
@@ -46,8 +47,8 @@ public class Solver {
 			solved = (solved) ? solved : nakedTripleSolver();
 			iteration++;
 		}
-		
-		
+	/* */	
+		solved = (solved) ? solved : bruteForceSolver(0);
 		System.out.println(solved ? SOLVED : UNSOLVED);
 	}
 	
@@ -94,6 +95,52 @@ public class Solver {
 		return solvable;
 	}
 	
+	private boolean nakedPairSolver() {
+		LinkedList<Integer> values = new LinkedList<Integer>();
+		for (int index=0; index < nakeds.size(); index++) {
+			NakedCandidates current = nakeds.get(index);
+			if (current.values.size() == 2 && !passOver(values, index)) {
+				System.out.println("Possible Pair Candidate found at " + current.x + ", " + current.y);
+				displayValues("Current Values", current.values);
+				int j = checkForNakedPairs(current.x, current.y, index);
+				values.add(j);
+			}
+		}
+		
+		return nakedSingleSolver();
+	}
+	
+	private boolean nakedTripleSolver() {
+		return nakedPairSolver();
+	}
+	
+	private boolean bruteForceSolver(int index) {
+		
+		boolean solvable = false;
+		NakedCandidates candidate = nakeds.get(index);
+		for (int i=0; i < candidate.values.size() && !solvable; i++) {
+			
+			if (!board.duplicateEntryColumn(candidate.y, candidate.values.get(i)) 
+					&& !board.duplicateEntryRow(candidate.x, candidate.values.get(i))
+					&& !board.duplicateEntrySection(candidate.x, candidate.y, candidate.values.get(i))) {
+				
+	//			System.out.println("Setting down value " + candidate.values.get(i) + " at coordinate ("+candidate.x+", "+candidate.y+")");
+				board.setValue(candidate.x, candidate.y, candidate.values.get(i));
+				solvable = (index < nakeds.size()-1 ? bruteForceSolver(index+1) : board.isSolved());
+			}
+	//		else {
+	//			int x = candidate.x;
+	//			int y = candidate.y;
+	//			String v = candidate.values.get(i);
+		//		System.out.println("Duplicate Value in " + v + " at ("+x+", "+y+").");
+	//		}
+		}
+		
+//		System.out.println((index > 0 ? "UNWINDING ONE LEVEL" : "BRUTE FORCE SOLVER ENDING"));
+		if (!solvable) { board.setValue(candidate.x, candidate.y, new String("*")); }
+		return solvable;
+	}
+	
 	private void removeAffectedCandidates(NakedCandidates candidate) {
 		
 		System.out.println("Removing candidate at coordinate ("+candidate.x+", "+candidate.y+") with value " + candidate.values.get(0));
@@ -131,21 +178,6 @@ public class Solver {
 			}
 			else { index++; }
 		}
-	}
-	
-	private boolean nakedPairSolver() {
-		LinkedList<Integer> values = new LinkedList<Integer>();
-		for (int index=0; index < nakeds.size(); index++) {
-			NakedCandidates current = nakeds.get(index);
-			if (current.values.size() == 2 && !passOver(values, index)) {
-				System.out.println("Possible Pair Candidate found at " + current.x + ", " + current.y);
-				displayValues("Current Values", current.values);
-				int j = checkForNakedPairs(current.x, current.y, index);
-				values.add(j);
-			}
-		}
-		
-		return nakedSingleSolver();
 	}
 	
 	private boolean passOver(LinkedList<Integer> values, int value) {
@@ -233,10 +265,6 @@ public class Solver {
 		}
 		
 		return removed;
-	}
-	
-	private boolean nakedTripleSolver() {
-		return nakedPairSolver();
 	}
 	
 	private boolean sameSection(NakedCandidates c1, NakedCandidates c2) {

@@ -304,6 +304,17 @@ public class SudokuBoard {
 		return sudokuGrid;
 	}
 	
+	public boolean isSolved() {
+		
+		boolean solved = true;
+		for (int x=0; x < size*size && solved; x++) {
+			for (int y=0; y < size*size && solved; y++) {
+				solved = (!sudokuGrid[x][y].equals(new String("*")));
+			}
+		}
+		return solved;
+	}
+	
 	/**
 	 * @author cthaw
 	 * @description Inner class BoardSize assists to determine the size of
