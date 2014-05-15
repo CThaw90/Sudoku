@@ -39,10 +39,14 @@ public class Solver {
 		}
 
 		extractCandidates();
+		int iteration=0;
+		while (!solved && iteration < 2) {
+			solved = (solved) ? solved : nakedSingleSolver();
+			solved = (solved) ? solved : nakedPairSolver();
+			solved = (solved) ? solved : nakedTripleSolver();
+			iteration++;
+		}
 		
-		solved = (solved) ? solved : nakedSingleSolver();
-		solved = (solved) ? solved : nakedPairSolver();
-		solved = (solved) ? solved : nakedTripleSolver();
 		
 		System.out.println(solved ? SOLVED : UNSOLVED);
 	}
@@ -292,6 +296,45 @@ public class Solver {
 				}
 			}
 		}
+	}
+	
+	public void groupCandidates() {
+		
+		/* Group Candidates by Row */
+		System.out.println("=====Grouping By Row=====");
+		for (int i=0; i < board.size*board.size; i++) {
+			for (int j=0; j < nakeds.size(); j++) {
+				if (nakeds.get(j).x == i) {
+					displayValues(new String("Evaluating Coordinate at ("+nakeds.get(j).x+", "+nakeds.get(j).y+")"), nakeds.get(j).values);
+				}
+			}
+		}
+		
+		/* Group Candidates by Column */
+		System.out.println("=====Grouping By Column=====");
+		for (int i=0; i < board.size*board.size; i++) {
+			for (int j=0; j < nakeds.size(); j++) {
+				if (nakeds.get(j).y == i) {
+					displayValues(new String("Evaluating Coordinate at ("+nakeds.get(j).x+", "+nakeds.get(j).y+")"), nakeds.get(j).values);
+				}
+			}
+		}
+		// FIGURE OUT HOW TO GROUP CANDIDATES BY SECTION
+		/* Group Candidates by Section * *
+		System.out.println("====Grouping By Section=====");
+		int count=0;
+		while (count < board.size*board.size) {
+			for (int x=0; x < board.size*board.size; x++) {
+				for (int y=0; y < board.size*board.size; y+=(board.size)) {
+					for (int j=0; j < nakeds.size(); j++) {
+						if (nakeds.get(j).x == x && nakeds.get(j).y == y) {
+							displayValues(new String("Evaluating Coordinate at ("+nakeds.get(j).x+", "+nakeds.get(j).y+")"), nakeds.get(j).values);
+						}
+					}
+				}
+			}
+		}
+		/* */
 	}
 /*
 	private NakedCandidates getNaked(int x, int y) {

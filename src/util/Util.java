@@ -112,6 +112,7 @@ public class Util {
 					
 					for (int j=0; j < readData.length; j++) {
 						if (readData[j].trim().equals(new String("*")) || isDigit(readData[j].trim())) {
+							
 							if (coordRem == 0 && j < readData.length-1) {
 								System.out.println("Error on line " + (i+1) + " too many declared coordinates");
 								return null;
@@ -120,8 +121,8 @@ public class Util {
 							newBoard.setValue(x, y, readData[j].trim());
 							y++;
 							
-							x += (y > 8) ? 1 : 0;
-							y = (y <= 8) ? y : 0;
+							x += (y > (newBoard.size*newBoard.size)-1) ? 1 : 0;
+							y = (y <= (newBoard.size*newBoard.size)-1) ? y : 0;
 							coordRem--;
 
 						}

@@ -13,14 +13,19 @@ public class TestRun {
      * @param args the command line arguments */
     public static void main(String[] args) {
         // TODO code application logic here
+    	long startTime = 0, elapsedTime = 0;
     	Util sudoku = new Util(args);
     	SudokuBoard[] board = sudoku.createSudokuBoards();
-
+    	Solver solver = null;
     	if (board != null) {
     		for (int i=0; i < board.length; i++) {
     			if (board[i] != null) {
     				board[i].displayGrid();
-    				new Solver(board[i]).solve();
+    				
+    				solver = new Solver(board[i]);
+    				startTime = System.currentTimeMillis();
+    				solver.solve();
+    				elapsedTime = System.currentTimeMillis() - startTime;
     			}
     		}
     		
@@ -29,6 +34,13 @@ public class TestRun {
     				board[i].displayGrid();
     			}
     		}
+    		
+    		if (solver != null) {
+    		//	solver.groupCandidates();
+    		}
+    		
+    		
+    		System.out.println("Solver took " + elapsedTime + "ms to solve.");
     	}
     	else {
     		System.out.println("All boards are set to null.");
