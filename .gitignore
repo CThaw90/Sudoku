@@ -2,4 +2,6 @@
 # ---------------
 /build/
 /dist/*.txt
+/dist/*.TXT
 *.class
+*.txt

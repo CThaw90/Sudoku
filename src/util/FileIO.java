@@ -8,8 +8,10 @@ public class FileIO {
 	private BufferedReader buffer;
 	private File file;
 
+	private static String hyphen = new String("-");
 	private StringBuilder dataBuilder;
 	private String pathLocation;
+	
 	
 	public FileIO() {
 		pathLocation = null;
@@ -35,6 +37,12 @@ public class FileIO {
 		file = new File(pathLocation);
 		if (!file.exists()) {
 			System.out.println("File or Directory not found. Path not Loaded");
+			try {
+				System.out.println("Put boards in " + new java.io.File(".").getCanonicalPath() + "/SudokuBoards/");
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		else {
 			System.out.println("Loaded Path Location " + pathLocation);
@@ -56,7 +64,6 @@ public class FileIO {
 			loadedData = new String[1];
 			parseFiles = new String[1];
 			parseFiles[0] = pathLocation.split("/")[pathLocation.split("/").length-1];
-//			System.out.println("File " + parseFiles[0] + " loaded from " + pathLocation); 
 			loadedData[0] = rawBoardData();
 		}
 		
@@ -69,25 +76,19 @@ public class FileIO {
 				parseFiles[i] = (filename.split("\\.")[1].equals(new String("sudoku")) ? filename : null);
 				validFiles+= (parseFiles[i] != null ? 1 : 0);
 			}
-			
-//			System.out.println("Valid File Count: " + validFiles);
+
 			loadedData = new String[validFiles];
-			
-//			System.out.print("Valid Files: ");
+
 			int j=0;
 			for (int i=0; i < parseFiles.length; i++) {
 				if (parseFiles[i] != null) {
-//					System.out.println( (parseFiles[i] != null ? parseFiles[i] : "Invalid") + " ");
 					loadedData[j] = rawBoardData(parseFiles[i]);
 					j++;
 				}
 				
 			}
 		}
-		
-		
 
-		
 		return loadedData;
 	}
 	
@@ -104,7 +105,7 @@ public class FileIO {
 			String dataline = new String();
 			
 			while ((dataline = buffer.readLine()) != null) {
-				dataBuilder.append(dataline);
+				dataBuilder.append(dataline + hyphen);
 			}
 		} catch (IOException e) {
 			System.out.println("Fatal System Error!");

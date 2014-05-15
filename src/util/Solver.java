@@ -11,23 +11,17 @@ public class Solver {
 	static String SOLVED = new String("Puzzle Solved!");
 	public LinkedList<NakedCandidates> nakeds;
 	public NakedCandidates candidate;
-//	String[][] sudokuGrid;
-//	int[][] boardGrid;
 	SudokuBoard board;
 	boolean solved;
 	
 	public Solver() {}
 	
 	public Solver(SudokuBoard board) {
-//		sudokuGrid = board.currentGridState();
-//		boardGrid = board.currentBoardState();
 		this.board = board;
 		solved = false;
 	}
 	
 	public void loadSudokuPuzzle(SudokuBoard board) {
-//		sudokuGrid = board.currentGridState();
-//		boardGrid = board.currentBoardState();
 		this.board = board;
 		solved = false;
 	}

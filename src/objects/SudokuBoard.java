@@ -108,7 +108,7 @@ public class SudokuBoard {
 		return duplicate;
 	}
 	
-public boolean duplicateEntrySection(int x, int y, int entry) {
+	public boolean duplicateEntrySection(int x, int y, int entry) {
 		
 		boolean duplicate = false;
 		
@@ -155,11 +155,11 @@ public boolean duplicateEntrySection(int x, int y, int entry) {
 				} else if (index >= 0) {
 					array[index] = sudokuGrid[x][y];
 				}
-		//		System.out.print(boardGrid[x][y]);
+
 				y = (rCs ? y+1 : y);
 				x = (rCs ? x : x+1);
 			}
-		//	System.out.print(" ");
+
 			x = (rCs ? x+1 : 0);
 			y = (rCs ? 0 : y+1); 
 			
@@ -192,11 +192,11 @@ public boolean duplicateEntrySection(int x, int y, int entry) {
 				} else if (index >= 0) {
 					array[index] = boardGrid[x][y];
 				}
-		//		System.out.print(boardGrid[x][y]);
+
 				y = (rCs ? y+1 : y);
 				x = (rCs ? x : x+1);
 			}
-		//	System.out.print(" ");
+
 			x = (rCs ? x+1 : 0);
 			y = (rCs ? 0 : y+1); 
 			
