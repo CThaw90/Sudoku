@@ -15,12 +15,20 @@ public class TestRun {
         // TODO code application logic here
     	Util sudoku = new Util(args);
     	SudokuBoard[] board = sudoku.createSudokuBoards();
+
     	if (board != null) {
     		for (int i=0; i < board.length; i++) {
-    			if (board[i] != null)
+    			if (board[i] != null) {
     				board[i].displayGrid();
+    				new Solver(board[i]).solve();
+    			}
     		}
-
+    		
+    		for (int i=0; i < board.length; i++) {
+    			if (board[i] != null) {
+    				board[i].displayGrid();
+    			}
+    		}
     	}
     	else {
     		System.out.println("All boards are set to null.");
