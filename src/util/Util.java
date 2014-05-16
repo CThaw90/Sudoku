@@ -78,6 +78,9 @@ public class Util {
 	private SudokuBoard constructSudokuBoard(String boardData) {
 		
 		SudokuBoard newBoard = null;
+		// Splits the raw data from the filename
+		String filename = boardData.split(";")[1];
+		boardData = boardData.split(";")[0];
 		
 		String[] parsedData = boardData.split(":");
 		if (parsedData.length == 2 && parsedData[0].matches("[\\d+][x][\\d+]")) {
@@ -100,7 +103,7 @@ public class Util {
 						if (readData[j].trim().equals(new String("*")) || isDigit(readData[j].trim())) {
 							
 							if (coordRem == 0 && j < readData.length-1) {
-								System.out.println("Error on line " + (i+1) + " too many declared coordinates");
+								System.out.println("Error on line " + (i+1) + " too many declared coordinates at file " + filename);
 								return null;
 							}
 
@@ -113,7 +116,7 @@ public class Util {
 
 						}
 						else {
-							System.out.println("Format error on line " + (i+1) + " unexpected symbol '" + readData[j] + "'");
+							System.out.println("Format error on line " + (i+1) + " unexpected symbol '" + readData[j] + "' at file " + filename);
 							return null;
 						}
 					}
@@ -121,7 +124,7 @@ public class Util {
 			}
 			
 			if (coordRem > 0) {
-				System.out.println("Error not enough coordinate values " + coordRem + " empty");
+				System.out.println("Error not enough coordinate values " + coordRem + " empty at file " + filename);
 				return null;
 			}
 		}
@@ -158,8 +161,7 @@ public class Util {
 	/**
 	 * @description determines whether a string is an integer
 	 * @param s string to be validated
-	 * @return true if the string object is a valid integer
-	 */
+	 * @return true if the string object is a valid integer */
 	private boolean isDigit(String s) {
 		
 		try {
