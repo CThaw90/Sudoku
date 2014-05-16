@@ -48,11 +48,13 @@ public class Solver {
 		extractCandidates();
 		
 		// The Sudoku Solvers 
-		solved = (solved) ? solved : nakedSingleSolver();
-		solved = (solved) ? solved : nakedPairSolver();
-		solved = (solved) ? solved : nakedTripleSolver(new LinkedList<NakedCandidates>(), new LinkedList<Integer>(), 0);
-		solved = (solved) ? solved : bruteForceSolver(0);
+		for (int i=0; i < board.size+1; i++) {
+			solved = (solved) ? solved : nakedSingleSolver();
+			solved = (solved) ? solved : nakedPairSolver();
+			solved = (solved) ? solved : nakedTripleSolver(new LinkedList<NakedCandidates>(), new LinkedList<Integer>(), 0);
+		}
 		
+	//	solved = (solved) ? solved : bruteForceSolver(0);
 		System.out.println(solved ? SOLVED : UNSOLVED);
 	}
 	
@@ -124,8 +126,9 @@ public class Solver {
 	
 	private boolean nakedTripleSolver(LinkedList<NakedCandidates> nakedTriples, LinkedList<Integer> values, int index) {
 		System.out.println("______NAKED TRIPLE SOLVER_______");
+		boolean solvable = false;
 		
-		for (/* index */; index < nakeds.size(); index++) {
+		for (/* index */; index < nakeds.size() && !solvable; index++) {
 			NakedCandidates current = nakeds.get(index);
 			System.out.println("Evaluating at Index " + index);
 			if ((current.values.size() == 2 || current.values.size() == 3) && !passOver(values, index) && nakedTriples.size() == 0) {
@@ -134,7 +137,7 @@ public class Solver {
 				nakedTriples.add(current);
 				System.out.println("Adding to nakedTriples. Current Capacity: " + nakedTriples.size());
 				values.add(index);
-				nakedTripleSolver(nakedTriples, values, index+1);
+				solvable = nakedTripleSolver(nakedTriples, values, index+1);
 			}
 			
 			else if ((current.values.size() == 2 || current.values.size() == 3) && !passOver(values, index)) {
@@ -148,7 +151,7 @@ public class Solver {
 						displayValues(new String("Comparator Candidates at ("+x+", "+y+"):"), comparator.values);
 						nakedTriples.add(current);
 						System.out.println("Adding to nakedTriples. Current Capacity: " + nakedTriples.size());
-						nakedTripleSolver(nakedTriples, values, index+1);
+						solvable = nakedTripleSolver(nakedTriples, values, index+1);
 					}
 					else {
 						displayValues(new String("Candidates at ("+current.x+", "+current.y+")"), current.values);
@@ -169,7 +172,27 @@ public class Solver {
 					NakedCandidates display = nakedTriples.get(j);
 					displayValues(new String("Candidates at ("+display.x+", "+display.y+")"), display.values);
 				}
-				return confirmNakedTriples(nakedTriples);
+				if (confirmNakedTriples(nakedTriples)) {
+					System.out.println("NAKED TRIPLES ARE CONFIRMED!!!!!");
+					NakedCandidates mockCandidate = new NakedCandidates(board.size*board.size);
+					
+					for (int i=0; i < nakedTriples.size(); i++) {
+						for (int j=0; j < nakedTriples.get(i).values.size(); j++) {
+							if (!passOver(mockCandidate.values, nakedTriples.get(i).values.get(j))) {
+								mockCandidate.values.add(nakedTriples.get(i).values.get(j));
+							}
+						}
+					}
+					
+					displayValues("MockCandidateValues", mockCandidate.values);
+					// mockCandidate.values.add(e);
+					// return false; //confirmNakedTriples(nakedTriples);
+					this.removeAffectedCandidates(mockCandidate);
+
+					return true;
+					
+				}
+			
 			}
 			
 			else if (nakedTriples.size() > 0) {
@@ -259,6 +282,138 @@ public class Solver {
 		NakedCandidates c1 = nakedTriples.get(0);
 		NakedCandidates c2 = nakedTriples.get(1);
 		NakedCandidates c3 = nakedTriples.get(2);
+		/* *
+		
+		(123) (123) (12) - {3/3/2} (or some combination thereof)
+		(123) (12) (23) - {3/2/2/}
+		(12) (23) (13) - {2/2/2}
+		/* */
+		
+		boolean compare3_3_3 = (c1.values.size() == 3 && c2.values.size() == 3 && c3.values.size() == 3);
+		boolean compare3_3_2 = (c1.values.size() == 3 && c2.values.size() == 3 && c3.values.size() == 2);
+		boolean compare3_2_3 = (c1.values.size() == 3 && c2.values.size() == 2 && c3.values.size() == 3);
+		boolean compare2_3_3 = (c1.values.size() == 2 && c2.values.size() == 3 && c3.values.size() == 3);
+		boolean compare3_2_2 = (c1.values.size() == 3 && c2.values.size() == 2 && c3.values.size() == 2);
+		boolean compare2_3_2 = (c1.values.size() == 2 && c2.values.size() == 3 && c3.values.size() == 2);
+		boolean compare2_2_3 = (c1.values.size() == 2 && c2.values.size() == 2 && c3.values.size() == 3);
+		boolean compare2_2_2 = (c1.values.size() == 2 && c2.values.size() == 2 && c3.values.size() == 2);
+		
+		if (compare3_3_3) {
+			/* Implementation of Naked Triple Match (123) (123) (123) - {3/3/3} (in terms of candidates per cell) */
+			aNakedTriple =(c1.values.get(0).equals(c2.values.get(0)) && c2.values.get(0).equals(c3.values.get(0)) &&
+						   c1.values.get(1).equals(c2.values.get(1)) && c2.values.get(1).equals(c3.values.get(1)) &&
+						   c1.values.get(2).equals(c2.values.get(2)) && c2.values.get(2).equals(c3.values.get(2)) );
+		}
+		
+		if (compare3_3_2) {
+			/* Implementation of Naked Triple Match (123) (123) (12) OR (123) (123) (23) {3/3/2} */
+			aNakedTriple =(c1.values.get(0).equals(c2.values.get(0)) && 
+						   c1.values.get(1).equals(c2.values.get(1)) &&
+						   c1.values.get(2).equals(c2.values.get(2)) 
+						   
+						   &&
+						   
+						  (c1.values.get(0).equals(c3.values.get(0)) &&
+						   c1.values.get(1).equals(c3.values.get(1))
+						   
+						   ||
+						   
+						   c1.values.get(1).equals(c3.values.get(0)) &&
+						   c1.values.get(2).equals(c3.values.get(2)) ));
+		}
+		
+		if (compare3_2_3) {
+			/* Implementation of Naked Triple Match (123) (12) (123) OR (123) (23) (123) {3/2/3} */
+			aNakedTriple = (c1.values.get(0).equals(c3.values.get(0)) && 
+					        c1.values.get(1).equals(c3.values.get(1)) &&
+					        c1.values.get(2).equals(c3.values.get(2))
+					        
+					        &&
+					        
+					       (c1.values.get(0).equals(c2.values.get(0)) &&
+					        c1.values.get(1).equals(c2.values.get(1))
+					        
+					        ||
+					        
+					    	c1.values.get(1).equals(c2.values.get(0)) &&
+					    	c1.values.get(2).equals(c2.values.get(1)) ));					
+		}
+		
+		if (compare2_3_3) {
+			/* Implementation of Naked Triple Match (12) (123) (123) OR (23) (123) (123) {2/3/3} */
+			aNakedTriple = (c2.values.get(0).equals(c3.values.get(0)) &&
+						    c2.values.get(1).equals(c3.values.get(1)) &&
+						    c2.values.get(2).equals(c3.values.get(2)) 
+						    
+							&&
+							
+						   (c1.values.get(0).equals(c2.values.get(0)) &&
+							c1.values.get(1).equals(c2.values.get(1)) 
+							
+							|| 
+							
+							c1.values.get(0).equals(c2.values.get(1)) &&
+							c1.values.get(0).equals(c2.values.get(2)) ));
+		}
+		
+		if (compare3_2_2) {
+			/* Implementation of Naked Triple Match   (123) (12) (23) OR (123) (23) (12) {3/2/2} */
+			aNakedTriple = (c1.values.get(0).equals(c2.values.get(0)) &&
+							c1.values.get(1).equals(c2.values.get(1)) &&
+							c1.values.get(1).equals(c3.values.get(0)) &&
+							c1.values.get(2).equals(c3.values.get(1)) 
+							
+							||
+							
+						   (c1.values.get(0).equals(c3.values.get(0)) &&
+							c1.values.get(1).equals(c3.values.get(1)) &&
+							c1.values.get(1).equals(c2.values.get(0)) &&
+							c1.values.get(2).equals(c2.values.get(1)) ));
+		}
+		
+		if (compare2_3_2) {
+			/* Implementation of Naked Triple Match   (12) (123) (23) OR (23) (123) (12) {2/3/2} */
+			aNakedTriple = (c1.values.get(0).equals(c2.values.get(0)) &&
+						    c1.values.get(1).equals(c2.values.get(1)) &&
+						    c1.values.get(1).equals(c3.values.get(0)) &&
+						    c2.values.get(2).equals(c3.values.get(1)) 
+					
+						    ||
+					
+						   (c1.values.get(0).equals(c2.values.get(1)) &&
+						    c1.values.get(1).equals(c2.values.get(2)) &&
+						    c2.values.get(0).equals(c3.values.get(0)) &&
+						    c2.values.get(1).equals(c3.values.get(1)) ));
+		}
+		
+		if (compare2_2_3) {
+			/* Implementation of Naked Triple Match   (12) (23) (123) OR (23) (12) (123) {2/2/3} */
+			aNakedTriple = (c1.values.get(0).equals(c3.values.get(0)) &&
+						    c1.values.get(1).equals(c2.values.get(0)) &&
+						    c1.values.get(1).equals(c3.values.get(0)) &&
+						    c1.values.get(2).equals(c3.values.get(1)) 
+					
+						    ||
+					
+						   (c1.values.get(0).equals(c3.values.get(0)) &&
+					        c1.values.get(1).equals(c3.values.get(1)) &&
+					        c1.values.get(1).equals(c2.values.get(0)) &&
+					        c1.values.get(2).equals(c2.values.get(1)) ));
+		}
+		
+		// (12) (23) (13) - {2/2/2}
+		if (compare2_2_2) {
+			/* Implementation of Naked Triple Match (12) (23) (13) OR (23) (12) (13) ( {2/2/2} */
+			aNakedTriple = (c1.values.get(0).equals(c3.values.get(0)) &&
+							c1.values.get(1).equals(c2.values.get(0)) &&
+							c2.values.get(1).equals(c3.values.get(1)) 
+							
+							||
+							
+						   (c1.values.get(0).equals(c2.values.get(1)) &&
+							c1.values.get(1).equals(c3.values.get(1)) &&
+							c2.values.get(0).equals(c3.values.get(0)) ));
+		}
 		
 		return aNakedTriple;
 	}
@@ -300,27 +455,27 @@ public class Solver {
 			NakedCandidates operator = nakeds.get(index);
 			
 			if (candidate.x == operator.x) {
-	//			System.out.println("Potential match values in the same row at ("+operator.x+", "+operator.y+")");
-	//			displayValues("Candidate Values", candidate.values);
-	//			displayValues("Operator Values", operator.values);
+				System.out.println("Potential match values in the same row at ("+operator.x+", "+operator.y+")");
+				displayValues("Candidate Values", candidate.values);
+				displayValues("Operator Values", operator.values);
 				deleteMatchingValues(candidate, operator);
-	//			displayValues("Result Values", operator.values);
+				displayValues("Result Values", operator.values);
 			}
 			
 			else if (candidate.y == operator.y) {
-	//			System.out.println("Potential match values in the same column at ("+operator.x+", "+operator.y+")");
-	//			displayValues("Candidate Values", candidate.values);
-	//			displayValues("Operator Values", operator.values);
+				System.out.println("Potential match values in the same column at ("+operator.x+", "+operator.y+")");
+				displayValues("Candidate Values", candidate.values);
+				displayValues("Operator Values", operator.values);
 				deleteMatchingValues(candidate, operator);
-	//			displayValues("Result Values", operator.values);
+				displayValues("Result Values", operator.values);
 			}
 			
 			if (sameSection(candidate, operator)) {
-	//			System.out.println("Potential match values in the same section at ("+operator.x+", "+operator.y+")");
-	//			displayValues("Candidate Values", candidate.values);
-	//			displayValues("Operator Values", operator.values);
+				System.out.println("Potential match values in the same section at ("+operator.x+", "+operator.y+")");
+				displayValues("Candidate Values", candidate.values);
+				displayValues("Operator Values", operator.values);
 				deleteMatchingValues(candidate, operator);
-	//			displayValues("Result Values", operator.values);
+				displayValues("Result Values", operator.values);
 			}
 			
 			if (operator.values.size() == 0) {
@@ -342,6 +497,15 @@ public class Solver {
 		boolean passOver = false;
 		for (int index=0; index < values.size() && !passOver; index++) {
 			passOver = (values.get(index) == value ? true : false);
+		}
+		return passOver;
+	}
+	
+	private boolean passOver(LinkedList<String> values, String value) {
+		
+		boolean passOver = false;
+		for (int index=0; index < values.size() && !passOver; index++) {
+			passOver = (values.get(index).equals(value));
 		}
 		return passOver;
 	}
