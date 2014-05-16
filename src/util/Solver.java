@@ -112,7 +112,7 @@ public class Solver {
 	private boolean nakedTripleSolver(LinkedList<NakedCandidates> nakedTriples, LinkedList<Integer> values, int index) {
 		System.out.println("______NAKED TRIPLE SOLVER_______");
 		
-		for (/* index */; index < nakeds.size(); index++) {
+		for (/* index */; index < nakeds.size() && nakedTriples.size() < 3; index++) {
 			NakedCandidates current = nakeds.get(index);
 			
 			if ((current.values.size() == 2 || current.values.size() == 3) && !passOver(values, index) && nakedTriples.size() == 0) {
@@ -125,17 +125,28 @@ public class Solver {
 				NakedCandidates comparator = nakedTriples.get(0);
 				if (comparator.x == current.x || comparator.y == current.y || sameSection(nakedTriples.get(0), current)) {
 					
-					
+					if (checkForNakedTriples(comparator, current)) {
+						nakedTriples.add(current);
+						nakedTripleSolver(nakedTriples, values, index);
+					}
 				}
 			}
 		}
+		
+		if (index == 0) {
+			System.out.println("==========Triple Candidates===========");
+			for (int i=0; i < nakedTriples.size(); i++) {
+				NakedCandidates triple = nakedTriples.get(i);
+				int x = triple.x, y = triple.y;
+				this.displayValues(new String("Naked Triple Values at "), nakedTriples.get(i).values); }
+			}
 		
 		return nakedPairSolver();
 	}
 	
 	private boolean checkForNakedTriples(NakedCandidates c1, NakedCandidates c2) {
 		
-		boolean compare3_2=false, compare3_3=false, compare2_2=false, compare2_3=false, matches=true;
+		boolean compare3_2=false, compare3_3=false, compare2_2=false, compare2_3=false, matches=false;
 		
 		compare2_3 = (c1.values.size() == 2 && c2.values.size() == 3);
 		compare3_2 = (c1.values.size() == 3 && c2.values.size() == 2);
@@ -143,17 +154,21 @@ public class Solver {
 		compare2_2 = (c1.values.size() == 2 && c2.values.size() == 2);
 		
 		if (compare2_3) {
-			matches = (c1.values.get(0) == c2.values.get(0) && c1.values.get(0) == c2.values.get(0));
-			matches = (matches ? matches : (c1.))
+			matches = (c1.values.get(0) == c2.values.get(0) && c1.values.get(1) == c2.values.get(1))
+					|| (c1.values.get(0) == c2.values.get(1) && c1.values.get(2) == c2.values.get(3)); 
 		}
 		else if (compare3_2) {
-			
+			matches = (c1.values.get(0) == c2.values.get(0) && c1.values.get(1) == c2.values.get(1))
+					|| (c1.values.get(1) == c2.values.get(0) && c1.values.get(2) == c2.values.get(1));
 		}
 		else if (compare3_3) {
+			matches = (c1.values.get(0) == c2.values.get(0) && 
+					   c1.values.get(1) == c2.values.get(1) &&
+					   c1.values.get(2) == c2.values.get(2)); 
 			
 		}
 		else if (compare2_2) {
-			
+			matches = (c1.values.get(0) == c2.values.get(0) && c1.values.get(1) == c2.values.get(1));
 		}
 		
 		

@@ -4,11 +4,6 @@ import objects.SudokuBoard;
 
 public class Util {
 	
-	/**
-	 * @param args the command line arguments
-	 * @description Util constructor responsible for invoking the parser and
-	 * parsing through the command line arguments if necessary.  */
-	
 	private String sudokuSize = null;
 	private String folderPath = null;
 	private String filePath = null;
@@ -16,6 +11,10 @@ public class Util {
 	
 	private FileIO inFile = null;
 	
+	/**
+	 * @param args the command line arguments
+	 * @description Util constructor responsible for invoking the parser and
+	 * parsing through the command line arguments if necessary.  */
 	public Util(String[] args) {
 		
 		if (args.length > 0) parseArguments(args);
@@ -31,6 +30,10 @@ public class Util {
 		System.out.println("Format: " + format);
 	}
 	
+	/**
+	 * @description responsible for parsing the command line arguments
+	 * Also sets the necessary attributes of the Util class
+	 * @param args the commandline arguments */
 	private void parseArguments(String[] args) {
 		int i=0;
 		while (i < args.length) {
@@ -41,34 +44,14 @@ public class Util {
 			else if (args[i].equals(Arguments.FILE)) {
 				filePath = args[++i];
 			}
-			
-			else if (args[i].equals(Arguments.SIZE)) {
-				i++;
-				if (args[i].equals(Arguments.SIZE_4x4) || args[i].equals(Arguments.SIZE_9x9) 
-						|| args[i].equals(Arguments.SIZE_16x16) || args[i].equals(Arguments.SIZE_25x25)) {
-					sudokuSize = args[i];
-				}
-				else {
-					System.out.println("Invalid Size Option. Using default 9x9 size");
-					sudokuSize = Arguments.SIZE_9x9;
-				}
-			}
-			
-			else if (args[i].equals(Arguments.FORMAT)) {
-				i++;
-				if (args[i].equals(Arguments.FORMAT_CSV) || args[i].equals(Arguments.FORMAT_GUI)) {
-					format = args[i];
-				}
-				else {
-					System.out.println("Invalid Format Option. Using default CSV format!");
-					format = Arguments.FORMAT_CSV;
-				}
-			}
-
 			i++;
 		}
 	}
 	
+	/**
+	 * @description creates the sudoku boards from the Raw data
+	 * returned by the FileIO object class
+	 * @return an array of created SudokuBoards */
 	public SudokuBoard[] createSudokuBoards() {
 		
 		inFile = new FileIO((filePath != null ? filePath : folderPath));
@@ -77,9 +60,7 @@ public class Util {
 		
 		
 		if (rawData != null) {
-		//	for (int i=0; i < rawData.length; i++)
-		//		System.out.println("Board Data " + i + ": " + rawData[i]);
-			
+
 			boards = new SudokuBoard[rawData.length];
 			
 			for (int i=0; i < boards.length; i++) {
@@ -89,13 +70,18 @@ public class Util {
 		return boards;
 	}
 	
+	/**
+	 * @description method is responsible for constructing a single SudokuBoard
+	 * from raw data returned by the FileIO object class
+	 * @param boardData data used to construct the SudokuBoard
+	 * @return a constructed SudokuBoard */
 	private SudokuBoard constructSudokuBoard(String boardData) {
 		
 		SudokuBoard newBoard = null;
 		
 		String[] parsedData = boardData.split(":");
 		if (parsedData.length == 2 && parsedData[0].matches("[\\d+][x][\\d+]")) {
-		//	System.out.println("Size Parameter: " + parsedData[0]);
+
 			newBoard = getBoardSize(parsedData[0].trim().toLowerCase());
 			int coordCnt = newBoard.size*newBoard.size*newBoard.size*newBoard.size;
 			int coordRem = coordCnt;
@@ -105,7 +91,7 @@ public class Util {
 			for (int i=0; i < parsedData.length; i++) {
 				
 				if (!parsedData[i].matches("\\s+") && !parsedData[i].isEmpty()) {
-				//	System.out.println("ParsedData line " + (i+1)+ " " + parsedData[i]);
+
 					String[] readData = parsedData[i].split(",");
 					int x = (coordCnt-coordRem)/(newBoard.size*newBoard.size);
 					int y = (coordRem)%(newBoard.size*newBoard.size);
@@ -131,6 +117,11 @@ public class Util {
 							return null;
 						}
 					}
+					
+					if (coordRem != 0) {
+						System.out.println("Error not enough coordinate values");
+						return null;
+					}
 				}
 			}
 		}
@@ -146,6 +137,10 @@ public class Util {
 		return newBoard;
 	}
 	
+	/**
+	 * @description declares the size of the SudokuBoard
+	 * @param sizeParameter 
+	 * @return returns a new SudokuBoard with the appropriate size */
 	public SudokuBoard getBoardSize(String sizeParameter) {
 		
 		if (sizeParameter.equals(Arguments.SIZE_4x4)) {return new SudokuBoard(SudokuBoard.SMALL); } 
@@ -160,6 +155,11 @@ public class Util {
 		return new SudokuBoard(SudokuBoard.REGULAR);
 	}
 	
+	/**
+	 * @description determines whether a string is an integer
+	 * @param s string to be validated
+	 * @return true if the string object is a valid integer
+	 */
 	private boolean isDigit(String s) {
 		
 		try {
@@ -170,19 +170,20 @@ public class Util {
 		}
 	}
 	
+	/**
+	 * @author cthaw
+	 * @description Static class holds static String objects for parsing purposes */
 	private static class Arguments {
 		
 		static String FOLDER = new String("--folder");
 		static String FILE = (new String("--file"));
-		
-		static String SIZE = (new String("--size"));
+
 		static String SIZE_4x4 = (new String("4x4"));
 		static String SIZE_9x9 = (new String("9x9"));
 		static String SIZE_16x16 = (new String("16x16"));
 		static String SIZE_25x25 = (new String("25x25"));
-		
-		static String FORMAT = (new String("--format"));
+
 		static String FORMAT_CSV = (new String("CSV"));
-		static String FORMAT_GUI = (new String("GUI"));
+
 	}
 }

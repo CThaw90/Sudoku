@@ -12,7 +12,7 @@ public class FileIO {
 	private StringBuilder dataBuilder;
 	private String pathLocation;
 	
-	
+	// Default Constructor
 	public FileIO() {
 		pathLocation = null;
 		fileReader = null;
@@ -20,6 +20,8 @@ public class FileIO {
 		file = null;
 	}
 	
+	// Constructor Loads the path to the file or folder
+	// Checks if the given pathLocation exists. If not loads the default SudokuBoards/ Folder
 	public FileIO(String pathLocation) {
 		
 		file = new File(pathLocation);
@@ -32,6 +34,8 @@ public class FileIO {
 		}
 	}
 	
+	// Method Loads the path to the file or folder
+	// Checks if the given pathLocation exists. If not loads the default SudokuBoards/ Folder
 	public void loadPathLocation(String pathLocation) {
 		
 		file = new File(pathLocation);
@@ -50,6 +54,10 @@ public class FileIO {
 		}
 	}
 	
+	/**
+	 * @description method loads all the files that match the given pathLocation
+	 * Each file is stored in a separate String index in the array
+	 * @return the String array with all files loaded in memory */
 	public String[] loadAllBoardData() {
 		
 		if (pathLocation == null) {
@@ -57,6 +65,7 @@ public class FileIO {
 			return new String[1];
 		}
 		
+		// Ensures the filename matches the sudoku format //
 		String[] loadedData = null;
 		String[] parseFiles = pathLocation.split("\\.");
 		
@@ -67,6 +76,8 @@ public class FileIO {
 			loadedData[0] = rawBoardData();
 		}
 		
+		// Checks if the pathLocation is a Folder and 
+		// loads all files that match the .sudoku format
 		else {
 			File[] files = file.listFiles();
 			parseFiles = new String[files.length];
@@ -92,10 +103,16 @@ public class FileIO {
 		return loadedData;
 	}
 	
+	// Using the default file location
 	private String rawBoardData() {
 		return rawBoardData(pathLocation);
 	}
 	
+	/**
+	 * @description retrieves the raw data stored in a .sudoku file
+	 * @param pathname path to the given file
+	 * @return the raw data from a given file
+	 */
 	private String rawBoardData(String pathname) {
 		dataBuilder = new StringBuilder();
 		
