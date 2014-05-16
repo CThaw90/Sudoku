@@ -85,3 +85,67 @@ Sudoku Board example:
 
    Be sure to use the .sudoku extension
 
+Human Strategies
+--------------------
+One of the more popular human strategies to solve Sudoku puzzles 
+is the called the NakedCandidate.
+
+Naked Candidates refer to all the remaining possible candidates on a cell
+which are going to be used in a strategy.
+
+NAKED SINGLE
+-----------------
+The simplest 'Naked' Situation is a Naked Single - the last remaining 
+candidate on a cell.
+
+NAKED PAIR
+-----------------
+Another situation is the Naked Pair - a set of two candidate numbers 
+sited in two different cells that belong in the same row, same column or
+the same section.
+
+When found all candidates in the same row column and section that match
+these values can be removed from the list of possible candidates
+
+NAKED TRIPLES
+-----------------
+Any group of three cells in the same unit that contain in total three 
+candidates is a Naked Triple. Each cell can have two or three numbers
+as long as collectively they hold the same group of three distinct 
+values.
+
+Candidates in the same row column and section that match these values 
+can be removed from the list of possible candidates
+
+Packages
+------------------------------
+
+Package util: Responsible for holding the utility classes that drive the
+features of the program
+
+Package objects: Responsible for holding the object classes designed to
+represent a tangible object in memory
+
+Package tests: Responsible for holding the TestRun files
+
+Class Objects
+------------------------------
+class TestRun: Simulates a test run of the entire program
+
+class SudokuBoard: Simulates a SudokuBoard in memory
+
+class NakedCandidates: Simulates the collection of all remaining possible
+values that may belong to a particular cell at a given coordinate
+
+class FileIO: Responsible for providing the interface between the Sudoku
+Solver Program and text files labelled with the .sudoku extension
+
+class Util: Responsible for creating objects in memory out of raw data
+retrieved from uploaded files
+
+class SudokuSeeder: Responsible for seeding a given SudokuBoard with a
+predetermined collection of values. Only functional for 4x4 and 9x9.
+
+class Solver: Responsible for solving a given SudokuBoard and determines
+if the board is solvable.
+

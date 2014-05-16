@@ -111,7 +111,7 @@ public class FileIO {
 	/**
 	 * @description retrieves the raw data stored in a .sudoku file
 	 * @param pathname path to the given file
-	 * @return the raw data from a given file */
+	 * @return the raw data from a given file and appends the filename */
 	private String rawBoardData(String pathname) {
 		dataBuilder = new StringBuilder();
 		
@@ -128,6 +128,6 @@ public class FileIO {
 			e.printStackTrace();
 		}
 		
-		return dataBuilder.toString();
+		return dataBuilder.toString() + new String(";" + pathname);
 	}
 }
