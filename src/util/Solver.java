@@ -17,13 +17,13 @@ public class Solver {
 	public Solver() {}
 	
 	public Solver(SudokuBoard board) {
+		solved = board.isSolved();
 		this.board = board;
-		solved = false;
 	}
 	
 	public void loadSudokuPuzzle(SudokuBoard board) {
+		solved = board.isSolved();
 		this.board = board;
-		solved = false;
 	}
 	
 	public void solve() {
@@ -39,16 +39,15 @@ public class Solver {
 		}
 
 		extractCandidates();
-	/* *
-		int iteration=0;
-		while (!solved && iteration < 2) {
+	/* */
+	//	int iteration=0;
+	//	while (!solved && iteration < 2) {
 			solved = (solved) ? solved : nakedSingleSolver();
 			solved = (solved) ? solved : nakedPairSolver();
-			solved = (solved) ? solved : nakedTripleSolver();
-			iteration++;
-		}
-	/* */	
-		solved = (solved) ? solved : bruteForceSolver(0);
+			solved = (solved) ? solved : nakedTripleSolver(new LinkedList<NakedCandidates>(), new LinkedList<Integer>(), 0);
+	//		iteration++;
+	//	}
+	//	solved = (solved) ? solved : bruteForceSolver(0);
 		System.out.println(solved ? SOLVED : UNSOLVED);
 	}
 	
@@ -110,8 +109,63 @@ public class Solver {
 		return nakedSingleSolver();
 	}
 	
-	private boolean nakedTripleSolver() {
+	private boolean nakedTripleSolver(LinkedList<NakedCandidates> nakedTriples, LinkedList<Integer> values, int index) {
+		System.out.println("______NAKED TRIPLE SOLVER_______");
+		
+		for (/* index */; index < nakeds.size(); index++) {
+			NakedCandidates current = nakeds.get(index);
+			
+			if ((current.values.size() == 2 || current.values.size() == 3) && !passOver(values, index) && nakedTriples.size() == 0) {
+				displayValues(new String("Candidates at ("+current.x+", "+current.y+")"), current.values);
+				nakedTriples.add(current);
+				nakedTripleSolver(nakedTriples, values, index);
+			}
+			
+			else if ((current.values.size() == 2 || current.values.size() == 3) && !passOver(values, index)) {
+				NakedCandidates comparator = nakedTriples.get(0);
+				if (comparator.x == current.x || comparator.y == current.y || sameSection(nakedTriples.get(0), current)) {
+					
+					
+				}
+			}
+		}
+		
 		return nakedPairSolver();
+	}
+	
+	private boolean checkForNakedTriples(NakedCandidates c1, NakedCandidates c2) {
+		
+		boolean compare3_2=false, compare3_3=false, compare2_2=false, compare2_3=false, matches=true;
+		
+		compare2_3 = (c1.values.size() == 2 && c2.values.size() == 3);
+		compare3_2 = (c1.values.size() == 3 && c2.values.size() == 2);
+		compare3_3 = (c1.values.size() == 3 && c2.values.size() == 3);
+		compare2_2 = (c1.values.size() == 2 && c2.values.size() == 2);
+		
+		if (compare2_3) {
+			matches = (c1.values.get(0) == c2.values.get(0) && c1.values.get(0) == c2.values.get(0));
+			matches = (matches ? matches : (c1.))
+		}
+		else if (compare3_2) {
+			
+		}
+		else if (compare3_3) {
+			
+		}
+		else if (compare2_2) {
+			
+		}
+		
+		
+		return matches;
+	}
+	
+	private int checkForNakedTriples(int x, int y, int index) {
+		
+		int pairIndex = -1;
+		LinkedList<String> comparator = nakeds.get(index).values;
+		
+		return pairIndex;
 	}
 	
 	private boolean bruteForceSolver(int index) {
@@ -124,19 +178,11 @@ public class Solver {
 					&& !board.duplicateEntryRow(candidate.x, candidate.values.get(i))
 					&& !board.duplicateEntrySection(candidate.x, candidate.y, candidate.values.get(i))) {
 				
-	//			System.out.println("Setting down value " + candidate.values.get(i) + " at coordinate ("+candidate.x+", "+candidate.y+")");
 				board.setValue(candidate.x, candidate.y, candidate.values.get(i));
 				solvable = (index < nakeds.size()-1 ? bruteForceSolver(index+1) : board.isSolved());
 			}
-	//		else {
-	//			int x = candidate.x;
-	//			int y = candidate.y;
-	//			String v = candidate.values.get(i);
-		//		System.out.println("Duplicate Value in " + v + " at ("+x+", "+y+").");
-	//		}
 		}
 		
-//		System.out.println((index > 0 ? "UNWINDING ONE LEVEL" : "BRUTE FORCE SOLVER ENDING"));
 		if (!solvable) { board.setValue(candidate.x, candidate.y, new String("*")); }
 		return solvable;
 	}
@@ -269,7 +315,6 @@ public class Solver {
 	
 	private boolean sameSection(NakedCandidates c1, NakedCandidates c2) {
 		int s = board.size;
-	//	return Math.abs(c1.x-c2.x) < board.size && Math.abs(c1.y-c2.y) < board.size ? true : false;
 		return (c1.x/s)*s == (c2.x/s)*s && (c1.y/s)*s == (c2.y/s)*s;
 	}
 	
@@ -331,6 +376,7 @@ public class Solver {
 		/* Group Candidates by Row */
 		System.out.println("=====Grouping By Row=====");
 		for (int i=0; i < board.size*board.size; i++) {
+			System.out.println("=========ROW " + (i+1)+ "===========");
 			for (int j=0; j < nakeds.size(); j++) {
 				if (nakeds.get(j).x == i) {
 					displayValues(new String("Evaluating Coordinate at ("+nakeds.get(j).x+", "+nakeds.get(j).y+")"), nakeds.get(j).values);
@@ -341,6 +387,7 @@ public class Solver {
 		/* Group Candidates by Column */
 		System.out.println("=====Grouping By Column=====");
 		for (int i=0; i < board.size*board.size; i++) {
+			System.out.println("=========COLUMN " + (i+1)+ "=========");
 			for (int j=0; j < nakeds.size(); j++) {
 				if (nakeds.get(j).y == i) {
 					displayValues(new String("Evaluating Coordinate at ("+nakeds.get(j).x+", "+nakeds.get(j).y+")"), nakeds.get(j).values);
@@ -348,23 +395,28 @@ public class Solver {
 			}
 		}
 		// FIGURE OUT HOW TO GROUP CANDIDATES BY SECTION
-		/* Group Candidates by Section * *
+		/* Group Candidates by Section * */
 		System.out.println("====Grouping By Section=====");
-		int count=0;
+		int count=0,startx=0,starty=0;
 		while (count < board.size*board.size) {
-			for (int x=0; x < board.size*board.size; x++) {
-				for (int y=0; y < board.size*board.size; y+=(board.size)) {
+			System.out.println("=======SECTION " + (count+1)+"=========");
+			for (int x=startx; x < startx+board.size; x++) {
+				for (int y=starty; y < starty+board.size; y++) {
 					for (int j=0; j < nakeds.size(); j++) {
 						if (nakeds.get(j).x == x && nakeds.get(j).y == y) {
 							displayValues(new String("Evaluating Coordinate at ("+nakeds.get(j).x+", "+nakeds.get(j).y+")"), nakeds.get(j).values);
 						}
+						
 					}
 				}
 			}
+			
+			count++;
+			starty= starty<(board.size*board.size)-board.size ? starty+board.size : 0;
+			startx=(count/board.size)*board.size;
 		}
-		/* */
 	}
-/*
+/* *
 	private NakedCandidates getNaked(int x, int y) {
 		
 		NakedCandidates candidates = null;
@@ -383,5 +435,5 @@ public class Solver {
 		
 		return candidates;
 	}
-*/
+/* */
 }

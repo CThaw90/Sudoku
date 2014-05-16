@@ -61,5 +61,4 @@ public class TestRun {
      //   board.displayGrid();
     //    solver.displayAllCandidates();
     }
-    
 }
