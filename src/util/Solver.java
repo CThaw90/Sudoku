@@ -112,8 +112,8 @@ public class Solver {
 		for (int index=0; index < nakeds.size(); index++) {
 			NakedCandidates current = nakeds.get(index);
 			if (current.values.size() == 2 && !passOver(values, index)) {
-				System.out.println("Possible Pair Candidate found at " + current.x + ", " + current.y);
-				displayValues("Current Values", current.values);
+		//		System.out.println("Possible Pair Candidate found at " + current.x + ", " + current.y);
+		//		displayValues("Current Values", current.values);
 				int j = checkForNakedPairs(current.x, current.y, index);
 				values.add(j);
 			}
@@ -125,34 +125,76 @@ public class Solver {
 	private boolean nakedTripleSolver(LinkedList<NakedCandidates> nakedTriples, LinkedList<Integer> values, int index) {
 		System.out.println("______NAKED TRIPLE SOLVER_______");
 		
-		for (/* index */; index < nakeds.size() && nakedTriples.size() < 3; index++) {
+		for (/* index */; index < nakeds.size(); index++) {
 			NakedCandidates current = nakeds.get(index);
-			
+			System.out.println("Evaluating at Index " + index);
 			if ((current.values.size() == 2 || current.values.size() == 3) && !passOver(values, index) && nakedTriples.size() == 0) {
 				displayValues(new String("Candidates at ("+current.x+", "+current.y+")"), current.values);
+				System.out.println("Match the initial set NakedTriple Profile");
 				nakedTriples.add(current);
-				nakedTripleSolver(nakedTriples, values, index);
+				System.out.println("Adding to nakedTriples. Current Capacity: " + nakedTriples.size());
+				values.add(index);
+				nakedTripleSolver(nakedTriples, values, index+1);
 			}
 			
 			else if ((current.values.size() == 2 || current.values.size() == 3) && !passOver(values, index)) {
 				NakedCandidates comparator = nakedTriples.get(0);
+				int x = comparator.x, y = comparator.y;
 				if (comparator.x == current.x || comparator.y == current.y || sameSection(nakedTriples.get(0), current)) {
 					
 					if (checkForNakedTriples(comparator, current)) {
+						System.out.println("Matched the NakedTriple Profle set by candidates at ("+x+", "+y+")");
+						displayValues(new String("Candidates at ("+current.x+", "+current.y+")"), current.values);
+						displayValues(new String("Comparator Candidates at ("+x+", "+y+"):"), comparator.values);
 						nakedTriples.add(current);
-						nakedTripleSolver(nakedTriples, values, index);
+						System.out.println("Adding to nakedTriples. Current Capacity: " + nakedTriples.size());
+						nakedTripleSolver(nakedTriples, values, index+1);
+					}
+					else {
+						displayValues(new String("Candidates at ("+current.x+", "+current.y+")"), current.values);
+						System.out.println("Does not match the set NakedTriple Profile");
+						displayValues(new String("Comparator Candidates"), comparator.values);
 					}
 				}
+				else {
+					displayValues(new String("Candidates at ("+current.x+", "+current.y+")"), current.values);
+					System.out.println("Does not match the set NakedTriple Profile at ("+comparator.x+", "+comparator.y+")");
+					displayValues(new String("Comparator Candidates at ("+comparator.x+", "+comparator.y+")"), comparator.values);
+				}
+			}
+			
+			else if (nakedTriples.size() == 3) {
+				System.out.println("THE NAKED TRIPLES");
+				for (int j=0; j < nakedTriples.size(); j++) {
+					NakedCandidates display = nakedTriples.get(j);
+					displayValues(new String("Candidates at ("+display.x+", "+display.y+")"), display.values);
+				}
+				return confirmNakedTriples(nakedTriples);
+			}
+			
+			else if (nakedTriples.size() > 0) {
+				NakedCandidates comparator = nakedTriples.get(0);
+				displayValues(new String("Candidates at ("+current.x+", "+current.y+")"), current.values);
+				System.out.println("Does not match the NakedTriple Profile");
+				displayValues(new String("Comparator Candidates at ("+comparator.x+", "+comparator.y+")"), comparator.values);
 			}
 		}
 		
-		if (index == 0) {
+		if (nakedTriples.size() == 0) {
 			System.out.println("==========Triple Candidates===========");
 			for (int i=0; i < nakedTriples.size(); i++) {
 				NakedCandidates triple = nakedTriples.get(i);
 				int x = triple.x, y = triple.y;
-				this.displayValues(new String("Naked Triple Values at "), nakedTriples.get(i).values); }
+				this.displayValues(new String("Naked Triple Values at ("+x+", "+y+")"), triple.values); 
 			}
+		}
+		
+		else {
+			System.out.println("UNWINDING RECURSION");
+			int i=nakedTriples.size() -1;
+			System.out.println("Removing Naked Candidate at (" + nakedTriples.get(i).x +", " + nakedTriples.get(i).y+") ");
+			nakedTriples.remove(nakedTriples.size()-1);
+		}
 		
 		return nakedPairSolver();
 	}
@@ -160,40 +202,65 @@ public class Solver {
 	private boolean checkForNakedTriples(NakedCandidates c1, NakedCandidates c2) {
 		
 		boolean compare3_2=false, compare3_3=false, compare2_2=false, compare2_3=false, matches=false;
-		
+		System.out.println("Comparing Candidates at coordinates ("+c1.x+", "+c1.y+") AND ("+c2.x+", "+c2.y+")");
 		compare2_3 = (c1.values.size() == 2 && c2.values.size() == 3);
 		compare3_2 = (c1.values.size() == 3 && c2.values.size() == 2);
 		compare3_3 = (c1.values.size() == 3 && c2.values.size() == 3);
 		compare2_2 = (c1.values.size() == 2 && c2.values.size() == 2);
 		
 		if (compare2_3) {
-			matches = (c1.values.get(0) == c2.values.get(0) && c1.values.get(1) == c2.values.get(1))
-					|| (c1.values.get(0) == c2.values.get(1) && c1.values.get(2) == c2.values.get(3)); 
+			matches = (c1.values.get(0).equals(c2.values.get(0)) && c1.values.get(1).equals(c2.values.get(1)))
+					||(c1.values.get(0).equals(c2.values.get(1)) && c1.values.get(1).equals(c2.values.get(2))); 
+			
+			System.out.println("Comparing " + c1.values.get(0) + " <---> " + c2.values.get(0));
+			System.out.println("Comparing " + c1.values.get(1) + " <---> " + c2.values.get(1));
+			System.out.println("-------------------------- OR ------------------------------");
+			System.out.println("Comparing " + c1.values.get(0) + " <---> " + c2.values.get(1));
+			System.out.println("Comparing " + c1.values.get(1) + " <---> " + c2.values.get(2));
 		}
 		else if (compare3_2) {
-			matches = (c1.values.get(0) == c2.values.get(0) && c1.values.get(1) == c2.values.get(1))
-					|| (c1.values.get(1) == c2.values.get(0) && c1.values.get(2) == c2.values.get(1));
+			matches = (c1.values.get(0).equals(c2.values.get(0)) && c1.values.get(1).equals(c2.values.get(1)))
+					||(c1.values.get(1).equals(c2.values.get(0)) && c1.values.get(2).equals(c2.values.get(1)));
+			
+			System.out.println("Comparing " + c1.values.get(0) + " <---> " + c2.values.get(0));
+			System.out.println("Comparing " + c1.values.get(1) + " <---> " + c2.values.get(1));
+			System.out.println("-------------------------- OR ------------------------------");
+			System.out.println("Comparing " + c1.values.get(1) + " <---> " + c2.values.get(0));
+			System.out.println("Comparing " + c1.values.get(2) + " <---> " + c2.values.get(1));
 		}
 		else if (compare3_3) {
-			matches = (c1.values.get(0) == c2.values.get(0) && 
-					   c1.values.get(1) == c2.values.get(1) &&
-					   c1.values.get(2) == c2.values.get(2)); 
+			matches = (c1.values.get(0).equals(c2.values.get(0)) && 
+					   c1.values.get(1).equals(c2.values.get(1)) &&
+					   c1.values.get(2).equals(c2.values.get(2)) ); 
+			
+			System.out.println("Comparing " + c1.values.get(0) + " <---> " + c2.values.get(0));
+			System.out.println("Comparing " + c1.values.get(1) + " <---> " + c2.values.get(1));
+			System.out.println("Comparing " + c1.values.get(2) + " <---> " + c2.values.get(2));
 			
 		}
 		else if (compare2_2) {
-			matches = (c1.values.get(0) == c2.values.get(0) && c1.values.get(1) == c2.values.get(1));
+			matches = (c1.values.get(0).equals(c2.values.get(0)) || 
+					   c1.values.get(1).equals(c2.values.get(1)) ||
+					   c1.values.get(1).equals(c2.values.get(0)) );
+			
+			System.out.println("Comparing " + c1.values.get(0) + " <---> " + c2.values.get(0));
+			System.out.println("-------------------------- OR ------------------------------");
+			System.out.println("Comparing " + c1.values.get(1) + " <---> " + c2.values.get(1));
+			System.out.println("-------------------------- OR ------------------------------");
+			System.out.println("Comparing " + c1.values.get(1) + " <---> " + c2.values.get(0));
 		}
-		
 		
 		return matches;
 	}
 	
-	private int checkForNakedTriples(int x, int y, int index) {
+	private boolean confirmNakedTriples(LinkedList<NakedCandidates> nakedTriples) {
+		boolean aNakedTriple=false;
 		
-		int pairIndex = -1;
-		LinkedList<String> comparator = nakeds.get(index).values;
+		NakedCandidates c1 = nakedTriples.get(0);
+		NakedCandidates c2 = nakedTriples.get(1);
+		NakedCandidates c3 = nakedTriples.get(2);
 		
-		return pairIndex;
+		return aNakedTriple;
 	}
 	
 	/**

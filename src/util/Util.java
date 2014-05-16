@@ -117,12 +117,12 @@ public class Util {
 							return null;
 						}
 					}
-					
-					if (coordRem != 0) {
-						System.out.println("Error not enough coordinate values");
-						return null;
-					}
 				}
+			}
+			
+			if (coordRem > 0) {
+				System.out.println("Error not enough coordinate values " + coordRem + " empty");
+				return null;
 			}
 		}
 		else {

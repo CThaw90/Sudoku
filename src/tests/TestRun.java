@@ -36,7 +36,7 @@ public class TestRun {
     		}
     		
     		if (solver != null) {
-    		//	solver.groupCandidates();
+    			solver.groupCandidates();
     		}
     		
     		
