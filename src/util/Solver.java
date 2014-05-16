@@ -126,44 +126,26 @@ public class Solver {
 	}
 	
 	private boolean nakedTripleSolver(LinkedList<NakedCandidates> nakedTriples, LinkedList<Integer> values, int index) {
-		System.out.println("______NAKED TRIPLE SOLVER_______");
 		boolean solvable = false;
 		
 		for (/* index */; index < nakeds.size() && !solvable; index++) {
 			NakedCandidates current = nakeds.get(index);
-			System.out.println("Evaluating at Index " + index);
+
 			if ((current.values.size() == 2 || current.values.size() == 3) && !passOver(values, index) && nakedTriples.size() == 0) {
-				displayValues(new String("Candidates at ("+current.x+", "+current.y+")"), current.values);
-				System.out.println("Match the initial set NakedTriple Profile");
 				nakedTriples.add(current);
-				System.out.println("Adding to nakedTriples. Current Capacity: " + nakedTriples.size());
 				values.add(index);
 				solvable = nakedTripleSolver(nakedTriples, values, index+1);
 			}
 			
 			else if ((current.values.size() == 2 || current.values.size() == 3) && !passOver(values, index)) {
 				NakedCandidates comparator = nakedTriples.get(0);
-				int x = comparator.x, y = comparator.y;
+
 				if (comparator.x == current.x || comparator.y == current.y || sameSection(nakedTriples.get(0), current)) {
 					
 					if (checkForNakedTriples(comparator, current)) {
-						System.out.println("Matched the NakedTriple Profle set by candidates at ("+x+", "+y+")");
-						displayValues(new String("Candidates at ("+current.x+", "+current.y+")"), current.values);
-						displayValues(new String("Comparator Candidates at ("+x+", "+y+"):"), comparator.values);
 						nakedTriples.add(current);
-						System.out.println("Adding to nakedTriples. Current Capacity: " + nakedTriples.size());
 						solvable = nakedTripleSolver(nakedTriples, values, index+1);
 					}
-					else {
-						displayValues(new String("Candidates at ("+current.x+", "+current.y+")"), current.values);
-						System.out.println("Does not match the set NakedTriple Profile");
-						displayValues(new String("Comparator Candidates"), comparator.values);
-					}
-				}
-				else {
-					displayValues(new String("Candidates at ("+current.x+", "+current.y+")"), current.values);
-					System.out.println("Does not match the set NakedTriple Profile at ("+comparator.x+", "+comparator.y+")");
-					displayValues(new String("Comparator Candidates at ("+comparator.x+", "+comparator.y+")"), comparator.values);
 				}
 			}
 			
@@ -178,13 +160,10 @@ public class Solver {
 									  sameSection(nakedTriples.get(1), nakedTriples.get(2));
 				
 				if (sameRow || sameColumn || sameSection) {
-					System.out.println("THE NAKED TRIPLES");
-					for (int j=0; j < nakedTriples.size(); j++) {
-						NakedCandidates display = nakedTriples.get(j);
-						displayValues(new String("Candidates at ("+display.x+", "+display.y+")"), display.values);
-					}
+
+
 					if (confirmNakedTriples(nakedTriples)) {
-						System.out.println("NAKED TRIPLES ARE CONFIRMED!!!!!");
+
 						NakedCandidates mockCandidate = new NakedCandidates(board.size*board.size);
 						mockCandidate.x = nakedTriples.get(0).x;
 						mockCandidate.y = nakedTriples.get(0).y;
@@ -196,35 +175,15 @@ public class Solver {
 								}
 							}
 						}
-					
-						displayValues("MockCandidateValues", mockCandidate.values);
+
 						removeAffectedCandidates(mockCandidate, sameRow, sameColumn, sameSection);
 						return true;
 					}
 				}
 			}
-			
-			else if (nakedTriples.size() > 0) {
-				NakedCandidates comparator = nakedTriples.get(0);
-				displayValues(new String("Candidates at ("+current.x+", "+current.y+")"), current.values);
-				System.out.println("Does not match the NakedTriple Profile");
-				displayValues(new String("Comparator Candidates at ("+comparator.x+", "+comparator.y+")"), comparator.values);
-			}
 		}
 		
-		if (nakedTriples.size() == 0) {
-			System.out.println("==========Triple Candidates===========");
-			for (int i=0; i < nakedTriples.size(); i++) {
-				NakedCandidates triple = nakedTriples.get(i);
-				int x = triple.x, y = triple.y;
-				this.displayValues(new String("Naked Triple Values at ("+x+", "+y+")"), triple.values); 
-			}
-		}
-		
-		else {
-			System.out.println("UNWINDING RECURSION");
-			int i=nakedTriples.size() -1;
-			System.out.println("Removing Naked Candidate at (" + nakedTriples.get(i).x +", " + nakedTriples.get(i).y+") ");
+		if (nakedTriples.size() != 0) {
 			nakedTriples.remove(nakedTriples.size()-1);
 		}
 		
@@ -234,52 +193,24 @@ public class Solver {
 	private boolean checkForNakedTriples(NakedCandidates c1, NakedCandidates c2) {
 		
 		boolean compare3_2=false, compare3_3=false, compare2_2=false, compare2_3=false, matches=false;
-		System.out.println("Comparing Candidates at coordinates ("+c1.x+", "+c1.y+") AND ("+c2.x+", "+c2.y+")");
-		compare2_3 = (c1.values.size() == 2 && c2.values.size() == 3);
-		compare3_2 = (c1.values.size() == 3 && c2.values.size() == 2);
-		compare3_3 = (c1.values.size() == 3 && c2.values.size() == 3);
-		compare2_2 = (c1.values.size() == 2 && c2.values.size() == 2);
-		
+
 		if (compare2_3) {
 			matches = (c1.values.get(0).equals(c2.values.get(0)) && c1.values.get(1).equals(c2.values.get(1)))
 					||(c1.values.get(0).equals(c2.values.get(1)) && c1.values.get(1).equals(c2.values.get(2))); 
-			
-			System.out.println("Comparing " + c1.values.get(0) + " <---> " + c2.values.get(0));
-			System.out.println("Comparing " + c1.values.get(1) + " <---> " + c2.values.get(1));
-			System.out.println("-------------------------- OR ------------------------------");
-			System.out.println("Comparing " + c1.values.get(0) + " <---> " + c2.values.get(1));
-			System.out.println("Comparing " + c1.values.get(1) + " <---> " + c2.values.get(2));
 		}
 		else if (compare3_2) {
 			matches = (c1.values.get(0).equals(c2.values.get(0)) && c1.values.get(1).equals(c2.values.get(1)))
 					||(c1.values.get(1).equals(c2.values.get(0)) && c1.values.get(2).equals(c2.values.get(1)));
-			
-			System.out.println("Comparing " + c1.values.get(0) + " <---> " + c2.values.get(0));
-			System.out.println("Comparing " + c1.values.get(1) + " <---> " + c2.values.get(1));
-			System.out.println("-------------------------- OR ------------------------------");
-			System.out.println("Comparing " + c1.values.get(1) + " <---> " + c2.values.get(0));
-			System.out.println("Comparing " + c1.values.get(2) + " <---> " + c2.values.get(1));
 		}
 		else if (compare3_3) {
 			matches = (c1.values.get(0).equals(c2.values.get(0)) && 
 					   c1.values.get(1).equals(c2.values.get(1)) &&
 					   c1.values.get(2).equals(c2.values.get(2)) ); 
-			
-			System.out.println("Comparing " + c1.values.get(0) + " <---> " + c2.values.get(0));
-			System.out.println("Comparing " + c1.values.get(1) + " <---> " + c2.values.get(1));
-			System.out.println("Comparing " + c1.values.get(2) + " <---> " + c2.values.get(2));
-			
 		}
 		else if (compare2_2) {
 			matches = (c1.values.get(0).equals(c2.values.get(0)) || 
 					   c1.values.get(1).equals(c2.values.get(1)) ||
 					   c1.values.get(1).equals(c2.values.get(0)) );
-			
-			System.out.println("Comparing " + c1.values.get(0) + " <---> " + c2.values.get(0));
-			System.out.println("-------------------------- OR ------------------------------");
-			System.out.println("Comparing " + c1.values.get(1) + " <---> " + c2.values.get(1));
-			System.out.println("-------------------------- OR ------------------------------");
-			System.out.println("Comparing " + c1.values.get(1) + " <---> " + c2.values.get(0));
 		}
 		
 		return matches;
@@ -444,16 +375,8 @@ public class Solver {
 					&& !board.duplicateEntryRow(candidate.x, candidate.values.get(i))
 					&& !board.duplicateEntrySection(candidate.x, candidate.y, candidate.values.get(i))) {
 				
-				System.out.println("Setting down value " + candidate.values.get(i) + " at coordinate ("+candidate.x+", "+candidate.y+")");
 				board.setValue(candidate.x, candidate.y, candidate.values.get(i));
 				solvable = (index < nakeds.size()-1 ? bruteForceSolver(index+1) : board.isSolved());
-			}
-			
-			else {
-			 	int x = candidate.x;
-			 	int y = candidate.y;
-			 	String v = candidate.values.get(i);
-			 	System.out.println("Duplicate Value in " + v + " at ("+x+", "+y+").");
 			}
 		}
 		
@@ -474,27 +397,15 @@ public class Solver {
 			NakedCandidates operator = nakeds.get(index);
 			
 			if (candidate.x == operator.x) {
-				System.out.println("Potential match values in the same row at ("+operator.x+", "+operator.y+")");
-				displayValues("Candidate Values", candidate.values);
-				displayValues("Operator Values", operator.values);
 				deleteMatchingValues(candidate, operator);
-				displayValues("Result Values", operator.values);
 			}
 			
 			else if (candidate.y == operator.y) {
-				System.out.println("Potential match values in the same column at ("+operator.x+", "+operator.y+")");
-				displayValues("Candidate Values", candidate.values);
-				displayValues("Operator Values", operator.values);
 				deleteMatchingValues(candidate, operator);
-				displayValues("Result Values", operator.values);
 			}
 			
 			if (sameSection(candidate, operator)) {
-				System.out.println("Potential match values in the same section at ("+operator.x+", "+operator.y+")");
-				displayValues("Candidate Values", candidate.values);
-				displayValues("Operator Values", operator.values);
 				deleteMatchingValues(candidate, operator);
-				displayValues("Result Values", operator.values);
 			}
 			
 			if (operator.values.size() == 0) {
@@ -511,27 +422,15 @@ public class Solver {
 			NakedCandidates operator = nakeds.get(index);
 			
 			if (sameRow && candidate.x == operator.x) {
-				System.out.println("Potential match values in the same row at ("+operator.x+", "+operator.y+")");
-				displayValues("Candidate Values", candidate.values);
-				displayValues("Operator Values", operator.values);
 				deleteMatchingValues(candidate, operator);
-				displayValues("Result Values", operator.values);
 			}
 			
 			else if (sameColumn && candidate.y == operator.y) {
-				System.out.println("Potential match values in the same column at ("+operator.x+", "+operator.y+")");
-				displayValues("Candidate Values", candidate.values);
-				displayValues("Operator Values", operator.values);
 				deleteMatchingValues(candidate, operator);
-				displayValues("Result Values", operator.values);
 			}
 			
 			if (sameSection && sameSection(candidate, operator)) {
-				System.out.println("Potential match values in the same section at ("+operator.x+", "+operator.y+")");
-				displayValues("Candidate Values", candidate.values);
-				displayValues("Operator Values", operator.values);
 				deleteMatchingValues(candidate, operator);
-				displayValues("Result Values", operator.values);
 			}
 			
 			if (operator.values.size() == 0) {
@@ -590,10 +489,7 @@ public class Solver {
 		for (int index=i; index < nakeds.size() && pairIndex < 0; index++) {
 			NakedCandidates current = nakeds.get(index);
 			if (current.values.size() == 2 && index != i) {
-				System.out.println("Possible Match for ("+x+", "+y+") at ("+current.x+", "+current.y+")");
 				LinkedList<String> candidate = current.values;
-				displayValues("Current Values", comparator);
-				displayValues("Compare Values", candidate);
 				pairIndex = (comparator.get(0).equals(candidate.get(0)) &&
 							 comparator.get(1).equals(candidate.get(1)) ? index : -1);
 				
@@ -612,7 +508,6 @@ public class Solver {
 		boolean sp = sameSection(current, comparator);
 		boolean removed = false;
 		
-		System.out.println("Match Found for ("+current.x+", "+current.y+") at ("+comparator.x+", "+comparator.y+")");
 		for (int index=0; index < nakeds.size() && (sp || cp || rp); index++) {
 			
 			if (!nakeds.get(index).equals(current) && !nakeds.get(index).equals(comparator)) {
@@ -620,29 +515,17 @@ public class Solver {
 				boolean d = false;
 				
 				if (rp && current.x == naked.x) {
-					System.out.println("Potential match values in the same row at ("+naked.x+", "+naked.y+")");
-					displayValues("Current Values", current.values);
-					displayValues("Naked Values", naked.values);
 					d = deleteMatchingValues(current, naked);
-					displayValues("Result Values", naked.values);
 					removed = (removed ? removed : d);
 				}
 				
 				if (cp && current.y == naked.y) {
-					System.out.println("Potential match values in the same column at ("+naked.x+", "+naked.y+")");
-					displayValues("Current Values", current.values);
-					displayValues("Naked Values", naked.values);
 					d = deleteMatchingValues(current, naked);
-					displayValues("Result Values", naked.values);
 					removed = (removed ? removed : d);
 				}
 				
 				if (sp && sameSection(current, naked)) {
-					System.out.println("Potential match values in the same section at ("+naked.x+", "+naked.y+")");
-					displayValues("Current Values", current.values);
-					displayValues("Naked Values", naked.values);
 					d = deleteMatchingValues(current, naked);
-					displayValues("Result Values", naked.values);
 					removed = (removed ? removed : d);
 				}
 			}
@@ -683,8 +566,6 @@ public class Solver {
 	 * Extracts all the possible values available for an empty Sudoku cell 
 	 * and stores them in a NakedCandidate object dedicated to a coordinate*/
 	private void extractCandidates() {
-	//	if (nakeds != null)
-	//		System.out.println("Extracting Candidates from " + nakeds.size() + " coords");
 		
 		nakeds = new LinkedList<NakedCandidates>();
 		int length = board.size*board.size;
@@ -692,8 +573,7 @@ public class Solver {
 			for (int y=0; y < length; y++) {
 
 				if (board.getStringValue(x, y).equals(new String("*"))) {
-					
-	//				System.out.println("Entered Eval at coordinate x="+x+" y="+y);
+
 					candidate = new NakedCandidates(board.size*board.size);
 					candidate.x = x;
 					candidate.y = y;
@@ -705,60 +585,12 @@ public class Solver {
 								&& !board.duplicateEntrySection(x, y, String.valueOf(i))) {
 							
 							candidate.values.add(String.valueOf(i));
-	//						System.out.print((i)+ " ");
 						}
 					}
 					
 					nakeds.add(candidate);
-	//				System.out.println();
 				}
 			}
-		}
-	}
-	
-	public void groupCandidates() {
-		
-		/* Group Candidates by Row */
-		System.out.println("=====Grouping By Row=====");
-		for (int i=0; i < board.size*board.size; i++) {
-			System.out.println("=========ROW " + (i+1)+ "===========");
-			for (int j=0; j < nakeds.size(); j++) {
-				if (nakeds.get(j).x == i) {
-					displayValues(new String("Evaluating Coordinate at ("+nakeds.get(j).x+", "+nakeds.get(j).y+")"), nakeds.get(j).values);
-				}
-			}
-		}
-		
-		/* Group Candidates by Column */
-		System.out.println("=====Grouping By Column=====");
-		for (int i=0; i < board.size*board.size; i++) {
-			System.out.println("=========COLUMN " + (i+1)+ "=========");
-			for (int j=0; j < nakeds.size(); j++) {
-				if (nakeds.get(j).y == i) {
-					displayValues(new String("Evaluating Coordinate at ("+nakeds.get(j).x+", "+nakeds.get(j).y+")"), nakeds.get(j).values);
-				}
-			}
-		}
-		// FIGURE OUT HOW TO GROUP CANDIDATES BY SECTION
-		/* Group Candidates by Section * */
-		System.out.println("====Grouping By Section=====");
-		int count=0,startx=0,starty=0;
-		while (count < board.size*board.size) {
-			System.out.println("=======SECTION " + (count+1)+"=========");
-			for (int x=startx; x < startx+board.size; x++) {
-				for (int y=starty; y < starty+board.size; y++) {
-					for (int j=0; j < nakeds.size(); j++) {
-						if (nakeds.get(j).x == x && nakeds.get(j).y == y) {
-							displayValues(new String("Evaluating Coordinate at ("+nakeds.get(j).x+", "+nakeds.get(j).y+")"), nakeds.get(j).values);
-						}
-						
-					}
-				}
-			}
-			
-			count++;
-			starty= starty<(board.size*board.size)-board.size ? starty+board.size : 0;
-			startx=(count/board.size)*board.size;
 		}
 	}
 }
