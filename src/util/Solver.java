@@ -16,16 +16,23 @@ public class Solver {
 	
 	public Solver() {}
 	
+	/**
+	 * @description constructor loads a SudokuBoard to solve
+	 * @param board */
 	public Solver(SudokuBoard board) {
 		solved = board.isSolved();
 		this.board = board;
 	}
 	
+	/**
+	 * @description method loads a SudokuBoard
+	 * @param board */
 	public void loadSudokuPuzzle(SudokuBoard board) {
 		solved = board.isSolved();
 		this.board = board;
 	}
 	
+	// Attempts to solves the loaded Sudoku Board
 	public void solve() {
 		
 		if (solved) {
@@ -39,15 +46,13 @@ public class Solver {
 		}
 
 		extractCandidates();
-	/* */
-	//	int iteration=0;
-	//	while (!solved && iteration < 2) {
-			solved = (solved) ? solved : nakedSingleSolver();
-			solved = (solved) ? solved : nakedPairSolver();
-			solved = (solved) ? solved : nakedTripleSolver(new LinkedList<NakedCandidates>(), new LinkedList<Integer>(), 0);
-	//		iteration++;
-	//	}
-	//	solved = (solved) ? solved : bruteForceSolver(0);
+		
+		// The Sudoku Solvers 
+		solved = (solved) ? solved : nakedSingleSolver();
+		solved = (solved) ? solved : nakedPairSolver();
+		solved = (solved) ? solved : nakedTripleSolver(new LinkedList<NakedCandidates>(), new LinkedList<Integer>(), 0);
+		solved = (solved) ? solved : bruteForceSolver(0);
+		
 		System.out.println(solved ? SOLVED : UNSOLVED);
 	}
 	
@@ -69,6 +74,10 @@ public class Solver {
 		}
 	}
 	
+	/**
+	 * @description the nakedSingle solver looks for spaces that only 
+	 * have one possible value to be placed
+	 * @return true if the puzzle is solved after the method exits */
 	private boolean nakedSingleSolver() {
 		
 		boolean solvable = true;
@@ -94,6 +103,10 @@ public class Solver {
 		return solvable;
 	}
 	
+	/**
+	 * @description the nakedPairSolver looks for two different coordinates
+	 * with the same pair of possible values in the same row, column or section
+	 * @return true if the puzzle is solved after the method exits */
 	private boolean nakedPairSolver() {
 		LinkedList<Integer> values = new LinkedList<Integer>();
 		for (int index=0; index < nakeds.size(); index++) {
@@ -183,6 +196,11 @@ public class Solver {
 		return pairIndex;
 	}
 	
+	/**
+	 * @description tries all combinations of possible values until the puzzle
+	 * is solved or is determined unsolvable
+	 * @param index keeps track of the NakedCandidate index in the LinkedList
+	 * @return true if the puzzle is solvable else returns false */
 	private boolean bruteForceSolver(int index) {
 		
 		boolean solvable = false;
@@ -202,36 +220,40 @@ public class Solver {
 		return solvable;
 	}
 	
+	/**
+	 * @description Removes all candidates that have been affected 
+	 * by an updated value to the SudokuBoard
+	 * @param  */
 	private void removeAffectedCandidates(NakedCandidates candidate) {
 		
-		System.out.println("Removing candidate at coordinate ("+candidate.x+", "+candidate.y+") with value " + candidate.values.get(0));
+	//	System.out.println("Removing candidate at coordinate ("+candidate.x+", "+candidate.y+") with value " + candidate.values.get(0));
 		
 		int index=0;
 		while (index < nakeds.size()) {
 			NakedCandidates operator = nakeds.get(index);
 			
 			if (candidate.x == operator.x) {
-				System.out.println("Potential match values in the same row at ("+operator.x+", "+operator.y+")");
-				displayValues("Candidate Values", candidate.values);
-				displayValues("Operator Values", operator.values);
+	//			System.out.println("Potential match values in the same row at ("+operator.x+", "+operator.y+")");
+	//			displayValues("Candidate Values", candidate.values);
+	//			displayValues("Operator Values", operator.values);
 				deleteMatchingValues(candidate, operator);
-				displayValues("Result Values", operator.values);
+	//			displayValues("Result Values", operator.values);
 			}
 			
 			else if (candidate.y == operator.y) {
-				System.out.println("Potential match values in the same column at ("+operator.x+", "+operator.y+")");
-				displayValues("Candidate Values", candidate.values);
-				displayValues("Operator Values", operator.values);
+	//			System.out.println("Potential match values in the same column at ("+operator.x+", "+operator.y+")");
+	//			displayValues("Candidate Values", candidate.values);
+	//			displayValues("Operator Values", operator.values);
 				deleteMatchingValues(candidate, operator);
-				displayValues("Result Values", operator.values);
+	//			displayValues("Result Values", operator.values);
 			}
 			
 			if (sameSection(candidate, operator)) {
-				System.out.println("Potential match values in the same section at ("+operator.x+", "+operator.y+")");
-				displayValues("Candidate Values", candidate.values);
-				displayValues("Operator Values", operator.values);
+	//			System.out.println("Potential match values in the same section at ("+operator.x+", "+operator.y+")");
+	//			displayValues("Candidate Values", candidate.values);
+	//			displayValues("Operator Values", operator.values);
 				deleteMatchingValues(candidate, operator);
-				displayValues("Result Values", operator.values);
+	//			displayValues("Result Values", operator.values);
 			}
 			
 			if (operator.values.size() == 0) {
@@ -241,6 +263,13 @@ public class Solver {
 		}
 	}
 	
+	/**
+	 * @description passes over all coordinates that have already
+	 * been evaluated
+	 * @param values coordinates already evaluated 
+	 * @param value coordinate to be evaluated
+	 * @return true if the coordinate to be evaluated exists in the
+	 * coordinates that have already been evaluated */
 	private boolean passOver(LinkedList<Integer> values, int value) {
 		
 		boolean passOver = false;
@@ -259,6 +288,13 @@ public class Solver {
 		System.out.println();
 	}
 	
+	/**
+	 * @description checks for two pairs of possible values in
+	 * the same row, column or section
+	 * @param x coordinate
+	 * @param y coordinate
+	 * @param i index of the NakedCandidate in the LinkedList
+	 * @return index of the matching NakedCandidate */
 	private int checkForNakedPairs(int x, int y, int i) {
 		
 		int pairIndex = -1;
@@ -267,10 +303,10 @@ public class Solver {
 		for (int index=i; index < nakeds.size() && pairIndex < 0; index++) {
 			NakedCandidates current = nakeds.get(index);
 			if (current.values.size() == 2 && index != i) {
-				System.out.println("Possible Match for ("+x+", "+y+") at ("+current.x+", "+current.y+")");
+	//			System.out.println("Possible Match for ("+x+", "+y+") at ("+current.x+", "+current.y+")");
 				LinkedList<String> candidate = current.values;
-				displayValues("Current Values", comparator);
-				displayValues("Compare Values", candidate);
+	//			displayValues("Current Values", comparator);
+	//			displayValues("Compare Values", candidate);
 				pairIndex = (comparator.get(0).equals(candidate.get(0)) &&
 							 comparator.get(1).equals(candidate.get(1)) ? index : -1);
 				
@@ -289,7 +325,7 @@ public class Solver {
 		boolean sp = sameSection(current, comparator);
 		boolean removed = false;
 		
-		System.out.println("Match Found for ("+current.x+", "+current.y+") at ("+comparator.x+", "+comparator.y+")");
+	//	System.out.println("Match Found for ("+current.x+", "+current.y+") at ("+comparator.x+", "+comparator.y+")");
 		for (int index=0; index < nakeds.size() && (sp || cp || rp); index++) {
 			
 			if (!nakeds.get(index).equals(current) && !nakeds.get(index).equals(comparator)) {
@@ -297,29 +333,29 @@ public class Solver {
 				boolean d = false;
 				
 				if (rp && current.x == naked.x) {
-					System.out.println("Potential match values in the same row at ("+naked.x+", "+naked.y+")");
-					displayValues("Current Values", current.values);
-					displayValues("Naked Values", naked.values);
+	//				System.out.println("Potential match values in the same row at ("+naked.x+", "+naked.y+")");
+	//				displayValues("Current Values", current.values);
+	//				displayValues("Naked Values", naked.values);
 					d = deleteMatchingValues(current, naked);
-					displayValues("Result Values", naked.values);
+	//				displayValues("Result Values", naked.values);
 					removed = (removed ? removed : d);
 				}
 				
 				if (cp && current.y == naked.y) {
-					System.out.println("Potential match values in the same column at ("+naked.x+", "+naked.y+")");
-					displayValues("Current Values", current.values);
-					displayValues("Naked Values", naked.values);
+	//				System.out.println("Potential match values in the same column at ("+naked.x+", "+naked.y+")");
+	//				displayValues("Current Values", current.values);
+	//				displayValues("Naked Values", naked.values);
 					d = deleteMatchingValues(current, naked);
-					displayValues("Result Values", naked.values);
+	//				displayValues("Result Values", naked.values);
 					removed = (removed ? removed : d);
 				}
 				
 				if (sp && sameSection(current, naked)) {
-					System.out.println("Potential match values in the same section at ("+naked.x+", "+naked.y+")");
-					displayValues("Current Values", current.values);
-					displayValues("Naked Values", naked.values);
+	//				System.out.println("Potential match values in the same section at ("+naked.x+", "+naked.y+")");
+	//				displayValues("Current Values", current.values);
+	//				displayValues("Naked Values", naked.values);
 					d = deleteMatchingValues(current, naked);
-					displayValues("Result Values", naked.values);
+	//				displayValues("Result Values", naked.values);
 					removed = (removed ? removed : d);
 				}
 			}
@@ -328,6 +364,7 @@ public class Solver {
 		return removed;
 	}
 	
+	// Determines whether two Naked Candidates are in the same section or box
 	private boolean sameSection(NakedCandidates c1, NakedCandidates c2) {
 		int s = board.size;
 		return (c1.x/s)*s == (c2.x/s)*s && (c1.y/s)*s == (c2.y/s)*s;
@@ -341,7 +378,7 @@ public class Solver {
 			while (j < operator.values.size()) {
 				
 				if (comparator.values.get(i).equals(operator.values.get(j))) {
-					System.out.println("Removing value " + operator.values.get(j) + " at coordinate (" + operator.x + ", " + operator.y +")");
+	//				System.out.println("Removing value " + operator.values.get(j) + " at coordinate (" + operator.x + ", " + operator.y +")");
 					operator.values.remove(j);
 					del = true;
 				}
@@ -353,8 +390,8 @@ public class Solver {
 	}
 	
 	private void extractCandidates() {
-		if (nakeds != null)
-			System.out.println("Extracting Candidates from " + nakeds.size() + " coords");
+	//	if (nakeds != null)
+	//		System.out.println("Extracting Candidates from " + nakeds.size() + " coords");
 		
 		nakeds = new LinkedList<NakedCandidates>();
 		int length = board.size*board.size;
@@ -363,7 +400,7 @@ public class Solver {
 
 				if (board.getStringValue(x, y).equals(new String("*"))) {
 					
-					System.out.println("Entered Eval at coordinate x="+x+" y="+y);
+	//				System.out.println("Entered Eval at coordinate x="+x+" y="+y);
 					candidate = new NakedCandidates(board.size*board.size);
 					candidate.x = x;
 					candidate.y = y;
@@ -375,12 +412,12 @@ public class Solver {
 								&& !board.duplicateEntrySection(x, y, String.valueOf(i))) {
 							
 							candidate.values.add(String.valueOf(i));
-							System.out.print((i)+ " ");
+	//						System.out.print((i)+ " ");
 						}
 					}
 					
 					nakeds.add(candidate);
-					System.out.println();
+	//				System.out.println();
 				}
 			}
 		}
@@ -431,24 +468,4 @@ public class Solver {
 			startx=(count/board.size)*board.size;
 		}
 	}
-/* *
-	private NakedCandidates getNaked(int x, int y) {
-		
-		NakedCandidates candidates = null;
-		
-		if (nakeds == null) {
-			System.out.println("No Candidates Stored!");
-			return candidate;
-		}
-		
-		for (int i=0; i < nakeds.size() && candidate == null; i++) {
-			NakedCandidates c = nakeds.get(i);
-			if (c.x == x && c.y == y) {
-				candidates = c;
-			}
-		}
-		
-		return candidates;
-	}
-/* */
 }
