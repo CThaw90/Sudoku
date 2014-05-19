@@ -48,12 +48,13 @@ public class Solver {
 		extractCandidates();
 		
 		// The Sudoku Solvers iterate with proportion to the board size
-		for (int i=0; i < board.size; i++) {
+		for (int i=0; i < board.size && !solved; i++) {
 			solved = (solved) ? solved : nakedSingleSolver();
 			solved = (solved) ? solved : nakedPairSolver();
-			solved = (solved) ? solved : bruteForceSolver(0);
 			solved = (solved) ? solved : nakedTripleSolver(new LinkedList<NakedCandidates>(), new LinkedList<Integer>(), 0);
 		}
+		
+	//	solved = (solved) ? solved : bruteForceSolver(0);
 		
 		
 		System.out.println(solved ? SOLVED : UNSOLVED);
@@ -137,7 +138,9 @@ public class Solver {
 				System.out.println("Match the initial set NakedTriple Profile");
 				nakedTriples.add(current);
 				System.out.println("Adding to nakedTriples. Current Capacity: " + nakedTriples.size());
+				System.out.println("Adding the Naked Candidate index " + index + " to the values list");
 				values.add(index);
+				
 				solvable = nakedTripleSolver(nakedTriples, values, index+1);
 			}
 			
@@ -151,7 +154,9 @@ public class Solver {
 						displayValues(new String("Candidates at ("+current.x+", "+current.y+")"), current.values);
 						displayValues(new String("Comparator Candidates at ("+x+", "+y+"):"), comparator.values);
 						nakedTriples.add(current);
+						values.add(index);
 						System.out.println("Adding to nakedTriples. Current Capacity: " + nakedTriples.size());
+						System.out.println("Adding the Naked Candidate index " + index + " to the values list");
 						solvable = nakedTripleSolver(nakedTriples, values, index+1);
 					}
 					else {
@@ -188,6 +193,7 @@ public class Solver {
 						NakedCandidates mockCandidate = new NakedCandidates(board.size*board.size);
 						mockCandidate.x = nakedTriples.get(0).x;
 						mockCandidate.y = nakedTriples.get(0).y;
+						displayValues(values);
 						
 						for (int i=0; i < nakedTriples.size(); i++) {
 							for (int j=0; j < nakedTriples.get(i).values.size(); j++) {
@@ -198,7 +204,7 @@ public class Solver {
 						}
 					
 						displayValues("MockCandidateValues", mockCandidate.values);
-						removeAffectedCandidates(mockCandidate, sameRow, sameColumn, sameSection);
+						removeAffectedCandidates(mockCandidate, values, sameRow, sameColumn, sameSection);
 						return true;
 					}
 				}
@@ -226,6 +232,7 @@ public class Solver {
 			int i=nakedTriples.size() -1;
 			System.out.println("Removing Naked Candidate at (" + nakedTriples.get(i).x +", " + nakedTriples.get(i).y+") ");
 			nakedTriples.remove(nakedTriples.size()-1);
+			values.remove(values.size()-1);
 		}
 		
 		return nakedPairSolver();
@@ -467,7 +474,7 @@ public class Solver {
 	 * @param  */
 	private void removeAffectedCandidates(NakedCandidates candidate) {
 		
-	//	System.out.println("Removing candidate at coordinate ("+candidate.x+", "+candidate.y+") with value " + candidate.values.get(0));
+		System.out.println("Removing candidate at coordinate ("+candidate.x+", "+candidate.y+") with value " + candidate.values.get(0));
 		
 		int index=0;
 		while (index < nakeds.size()) {
@@ -504,13 +511,15 @@ public class Solver {
 		}
 	}
 	
-	private void removeAffectedCandidates(NakedCandidates candidate, boolean sameRow, boolean sameColumn, boolean sameSection) {
+	private void removeAffectedCandidates(NakedCandidates candidate, LinkedList<Integer> nakedTriples, boolean sameRow, boolean sameColumn, boolean sameSection) {
 		
 		int index=0;
 		while (index < nakeds.size()) {
 			NakedCandidates operator = nakeds.get(index);
+			System.out.println("Checking Naked Candidate at coordinate " + operator.x + ", " + operator.y);
+			displayValues("Checking Values", operator.values);
 			
-			if (sameRow && candidate.x == operator.x) {
+			if (sameRow && candidate.x == operator.x && !passOver(nakedTriples, index)) {
 				System.out.println("Potential match values in the same row at ("+operator.x+", "+operator.y+")");
 				displayValues("Candidate Values", candidate.values);
 				displayValues("Operator Values", operator.values);
@@ -518,7 +527,7 @@ public class Solver {
 				displayValues("Result Values", operator.values);
 			}
 			
-			else if (sameColumn && candidate.y == operator.y) {
+			else if (sameColumn && candidate.y == operator.y && !passOver(nakedTriples, index)) {
 				System.out.println("Potential match values in the same column at ("+operator.x+", "+operator.y+")");
 				displayValues("Candidate Values", candidate.values);
 				displayValues("Operator Values", operator.values);
@@ -526,7 +535,7 @@ public class Solver {
 				displayValues("Result Values", operator.values);
 			}
 			
-			if (sameSection && sameSection(candidate, operator)) {
+			if (sameSection && sameSection(candidate, operator) && !passOver(nakedTriples, index)) {
 				System.out.println("Potential match values in the same section at ("+operator.x+", "+operator.y+")");
 				displayValues("Candidate Values", candidate.values);
 				displayValues("Operator Values", operator.values);
@@ -553,6 +562,7 @@ public class Solver {
 		boolean passOver = false;
 		for (int index=0; index < values.size() && !passOver; index++) {
 			passOver = (values.get(index) == value ? true : false);
+			System.out.println(values.get(index) + " == " + value + " PASS OVER?!?!");
 		}
 		return passOver;
 	}
@@ -562,6 +572,7 @@ public class Solver {
 		boolean passOver = false;
 		for (int index=0; index < values.size() && !passOver; index++) {
 			passOver = (values.get(index).equals(value));
+		//	System.out.println(values.get(index) + " == " + value + " PASS OVER?!?!");
 		}
 		return passOver;
 	}
@@ -571,6 +582,15 @@ public class Solver {
 		System.out.print(title + ":");
 		for (int i=0; i < values.size(); i++) {
 			System.out.print(" " + values.get(i));
+		}
+		System.out.println();
+	}
+	
+	private void displayValues(LinkedList<Integer> values) {
+		
+		System.out.print("NakedTriples Index: ");
+		for (int index=0; index < values.size(); index++) {
+			System.out.print(values.get(index) + " ");
 		}
 		System.out.println();
 	}
@@ -681,10 +701,10 @@ public class Solver {
 	
 	/**
 	 * Extracts all the possible values available for an empty Sudoku cell 
-	 * and stores them in a NakedCandidate object dedicated to a coordinate*/
+	 * and stores them in a NakedCandidate object dedicated to a coordinate */
 	private void extractCandidates() {
-	//	if (nakeds != null)
-	//		System.out.println("Extracting Candidates from " + nakeds.size() + " coords");
+		if (nakeds != null)
+			System.out.println("Extracting Candidates from " + nakeds.size() + " coords");
 		
 		nakeds = new LinkedList<NakedCandidates>();
 		int length = board.size*board.size;
@@ -693,7 +713,7 @@ public class Solver {
 
 				if (board.getStringValue(x, y).equals(new String("*"))) {
 					
-	//				System.out.println("Entered Eval at coordinate x="+x+" y="+y);
+					System.out.println("Entered Eval at coordinate x="+x+" y="+y);
 					candidate = new NakedCandidates(board.size*board.size);
 					candidate.x = x;
 					candidate.y = y;
@@ -705,12 +725,12 @@ public class Solver {
 								&& !board.duplicateEntrySection(x, y, String.valueOf(i))) {
 							
 							candidate.values.add(String.valueOf(i));
-	//						System.out.print((i)+ " ");
+							System.out.print((i)+ " ");
 						}
 					}
-					
+
 					nakeds.add(candidate);
-	//				System.out.println();
+					System.out.println();
 				}
 			}
 		}

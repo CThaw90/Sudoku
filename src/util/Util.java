@@ -22,7 +22,7 @@ public class Util {
 		filePath = (filePath != null ? filePath : null);
 		format = (format != null ? format : Arguments.FORMAT_CSV);
 		sudokuSize = (sudokuSize != null ? sudokuSize : Arguments.SIZE_9x9);
-		folderPath = (folderPath != null ? folderPath : new String("SudokuBoards"));
+		folderPath = (folderPath != null ? folderPath : new String("SudokuBoards/hard3.sudoku"));
 		
 		System.out.println("Sudoku Size: " + sudokuSize);
 		System.out.println("FolderPath: " + folderPath);
