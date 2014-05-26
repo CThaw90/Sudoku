@@ -52,9 +52,10 @@ public class Solver {
 			solved = (solved) ? solved : nakedSingleSolver();
 			solved = (solved) ? solved : nakedPairSolver();
 			solved = (solved) ? solved : nakedTripleSolver(new LinkedList<NakedCandidates>(), new LinkedList<Integer>(), 0);
+			System.out.println("======= SOLVER LOOPED =======");
 		}
 		
-		solved = (solved) ? solved : bruteForceSolver(0);
+	//	solved = (solved) ? solved : bruteForceSolver(0);
 		
 		System.out.println(solved ? SOLVED : UNSOLVED);
 	}
@@ -104,6 +105,7 @@ public class Solver {
 			}
 		}
 		
+		if (!solvable) { System.out.println("Single Solver could not finish solving the puzzle"); }
 		return solvable;
 	}
 	
@@ -145,6 +147,7 @@ public class Solver {
 				values.add(current.id);
 				
 				solvable = nakedTripleSolver(nakedTriples, values, index+1);
+				System.out.println("NAKEDTRIPLESOLVER COMPLETELY UNRAVELED!!");
 			}
 			
 			else if ((current.values.size() == 2 || current.values.size() == 3) && !passOver(values, nakeds.get(index).id)) {
@@ -161,6 +164,8 @@ public class Solver {
 						System.out.println("Adding to nakedTriples. Current Capacity: " + nakedTriples.size());
 						System.out.println("Adding the Naked Candidate with id " + current.id + " to the values list");
 						solvable = nakedTripleSolver(nakedTriples, values, index+1);
+						System.out.println("NAKEDTRIPLESOLVER SECOND UNWINDING");
+						
 					}
 					else {
 						displayValues(new String("Candidates at ("+current.x+", "+current.y+")"), current.values);
@@ -232,16 +237,17 @@ public class Solver {
 		}
 		
 		else {
-			System.out.println("UNWINDING RECURSION");
 			int i=nakedTriples.size() -1;
 			System.out.println("Removing Naked Candidate at (" + nakedTriples.get(i).x +", " + nakedTriples.get(i).y+") ");
 			nakedTriples.remove(nakedTriples.size()-1);
 			values.remove(values.size()-1);
+			System.out.println("UNWINDING RECURSION");
 			if (!solvable) { return solvable; }
 			// return solvable;
 		}
 		
-		return nakedPairSolver();
+		System.out.println("Invoking Naked Pair Solver from Triple Solver with " + nakedTriples.size() + " Naked Triples");
+		return (values.size() > 0) ? solvable : nakedPairSolver();
 	}
 	
 	private boolean checkForNakedTriples(NakedCandidates c1, NakedCandidates c2) {
