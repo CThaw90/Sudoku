@@ -52,6 +52,7 @@ public class Solver {
 			solved = (solved) ? solved : nakedSingleSolver();
 			solved = (solved) ? solved : nakedPairSolver();
 			solved = (solved) ? solved : nakedTripleSolver(new LinkedList<NakedCandidates>(), new LinkedList<Integer>(), 0);
+			solved = (solved) ? solved : nakedQuadSolver(new LinkedList<NakedCandidates>(), new LinkedList<Integer>(), 0);
 			System.out.println("======= SOLVER LOOPED =======");
 		}
 		
@@ -248,6 +249,16 @@ public class Solver {
 		
 		System.out.println("Invoking Naked Pair Solver from Triple Solver with " + nakedTriples.size() + " Naked Triples");
 		return (values.size() > 0) ? solvable : nakedPairSolver();
+	}
+	
+	private boolean nakedQuadSolver(LinkedList<NakedCandidates> nakedQuads, LinkedList<Integer> values, int index) {
+		
+		boolean solvable = false;
+		
+		return (solvable) ? 
+				nakedTripleSolver(new LinkedList<NakedCandidates>(), new LinkedList<Integer>(), 0) 
+				: 
+				solvable;
 	}
 	
 	private boolean checkForNakedTriples(NakedCandidates c1, NakedCandidates c2) {
