@@ -54,8 +54,7 @@ public class Solver {
 			solved = (solved) ? solved : nakedTripleSolver(new LinkedList<NakedCandidates>(), new LinkedList<Integer>(), 0);
 		}
 		
-	//	solved = (solved) ? solved : bruteForceSolver(0);
-		
+		solved = (solved) ? solved : bruteForceSolver(0);
 		
 		System.out.println(solved ? SOLVED : UNSOLVED);
 	}
@@ -88,6 +87,7 @@ public class Solver {
 		
 		while (nakeds.size() > 0 && solvable) {
 			
+			System.out.println("______NAKED SINGLE SOLVER______");
 			solvable = false;
 			int i=0;
 			
@@ -112,14 +112,17 @@ public class Solver {
 	 * with the same pair of possible values in the same row, column or section
 	 * @return true if the puzzle is solved after the method exits */
 	private boolean nakedPairSolver() {
+		System.out.println("______NAKED PAIR SOLVER______");
 		LinkedList<Integer> values = new LinkedList<Integer>();
 		for (int index=0; index < nakeds.size(); index++) {
 			NakedCandidates current = nakeds.get(index);
-			if (current.values.size() == 2 && !passOver(values, index)) {
+			if (current.values.size() == 2 && !passOver(values, nakeds.get(index).id)) { /* Modified to check for Candidate Unique Id */
 				System.out.println("Possible Pair Candidate found at " + current.x + ", " + current.y);
 				displayValues("Current Values", current.values);
 				int j = checkForNakedPairs(current.x, current.y, index);
-				values.add(j);
+				
+				// Ensure Index of -1 doesn't get added to the list of Cached Values.
+				if (j != -1) { values.add(nakeds.get(j).id); } /* Modified to cache Candidate unique Id */
 			}
 		}
 		
@@ -133,18 +136,18 @@ public class Solver {
 		for (/* index */; index < nakeds.size() && !solvable; index++) {
 			NakedCandidates current = nakeds.get(index);
 			System.out.println("Evaluating at Index " + index);
-			if ((current.values.size() == 2 || current.values.size() == 3) && !passOver(values, index) && nakedTriples.size() == 0) {
+			if ((current.values.size() == 2 || current.values.size() == 3) && !passOver(values, nakeds.get(index).id) && nakedTriples.size() == 0) {
 				displayValues(new String("Candidates at ("+current.x+", "+current.y+")"), current.values);
 				System.out.println("Match the initial set NakedTriple Profile");
 				nakedTriples.add(current);
 				System.out.println("Adding to nakedTriples. Current Capacity: " + nakedTriples.size());
-				System.out.println("Adding the Naked Candidate index " + index + " to the values list");
-				values.add(index);
+				System.out.println("Adding the Naked Candidate with id " + current.id + " to the values list");
+				values.add(current.id);
 				
 				solvable = nakedTripleSolver(nakedTriples, values, index+1);
 			}
 			
-			else if ((current.values.size() == 2 || current.values.size() == 3) && !passOver(values, index)) {
+			else if ((current.values.size() == 2 || current.values.size() == 3) && !passOver(values, nakeds.get(index).id)) {
 				NakedCandidates comparator = nakedTriples.get(0);
 				int x = comparator.x, y = comparator.y;
 				if (comparator.x == current.x || comparator.y == current.y || sameSection(nakedTriples.get(0), current)) {
@@ -154,9 +157,9 @@ public class Solver {
 						displayValues(new String("Candidates at ("+current.x+", "+current.y+")"), current.values);
 						displayValues(new String("Comparator Candidates at ("+x+", "+y+"):"), comparator.values);
 						nakedTriples.add(current);
-						values.add(index);
+						values.add(current.id);
 						System.out.println("Adding to nakedTriples. Current Capacity: " + nakedTriples.size());
-						System.out.println("Adding the Naked Candidate index " + index + " to the values list");
+						System.out.println("Adding the Naked Candidate with id " + current.id + " to the values list");
 						solvable = nakedTripleSolver(nakedTriples, values, index+1);
 					}
 					else {
@@ -205,7 +208,8 @@ public class Solver {
 					
 						displayValues("MockCandidateValues", mockCandidate.values);
 						removeAffectedCandidates(mockCandidate, values, sameRow, sameColumn, sameSection);
-						return true;
+						solvable = true;
+					//	return true;
 					}
 				}
 			}
@@ -233,6 +237,8 @@ public class Solver {
 			System.out.println("Removing Naked Candidate at (" + nakedTriples.get(i).x +", " + nakedTriples.get(i).y+") ");
 			nakedTriples.remove(nakedTriples.size()-1);
 			values.remove(values.size()-1);
+			if (!solvable) { return solvable; }
+			// return solvable;
 		}
 		
 		return nakedPairSolver();
@@ -337,7 +343,7 @@ public class Solver {
 						   ||
 						   
 						   c1.values.get(1).equals(c3.values.get(0)) &&
-						   c1.values.get(2).equals(c3.values.get(2)) ));
+						   c1.values.get(2).equals(c3.values.get(1)) ));
 		}
 		
 		if (compare3_2_3) {
@@ -519,7 +525,7 @@ public class Solver {
 			System.out.println("Checking Naked Candidate at coordinate " + operator.x + ", " + operator.y);
 			displayValues("Checking Values", operator.values);
 			
-			if (sameRow && candidate.x == operator.x && !passOver(nakedTriples, index)) {
+			if (sameRow && candidate.x == operator.x && !passOver(nakedTriples, operator.id)) {
 				System.out.println("Potential match values in the same row at ("+operator.x+", "+operator.y+")");
 				displayValues("Candidate Values", candidate.values);
 				displayValues("Operator Values", operator.values);
@@ -527,7 +533,7 @@ public class Solver {
 				displayValues("Result Values", operator.values);
 			}
 			
-			else if (sameColumn && candidate.y == operator.y && !passOver(nakedTriples, index)) {
+			else if (sameColumn && candidate.y == operator.y && !passOver(nakedTriples, operator.id)) {
 				System.out.println("Potential match values in the same column at ("+operator.x+", "+operator.y+")");
 				displayValues("Candidate Values", candidate.values);
 				displayValues("Operator Values", operator.values);
@@ -535,7 +541,7 @@ public class Solver {
 				displayValues("Result Values", operator.values);
 			}
 			
-			if (sameSection && sameSection(candidate, operator) && !passOver(nakedTriples, index)) {
+			if (sameSection && sameSection(candidate, operator) && !passOver(nakedTriples, operator.id)) {
 				System.out.println("Potential match values in the same section at ("+operator.x+", "+operator.y+")");
 				displayValues("Candidate Values", candidate.values);
 				displayValues("Operator Values", operator.values);
@@ -729,6 +735,7 @@ public class Solver {
 						}
 					}
 
+					candidate.id = nakeds.size();
 					nakeds.add(candidate);
 					System.out.println();
 				}

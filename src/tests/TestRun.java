@@ -45,9 +45,9 @@ public class TestRun {
     			}
     		}
     		
- //  		if (solver != null) {
- //   			solver.groupCandidates();
- //   		}
+    		if (solver != null) {
+    			solver.groupCandidates();
+    		}
     		
     		
     		System.out.println("Solver took " + elapsedTime + "ms to solve.");

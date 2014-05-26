@@ -10,6 +10,9 @@ public class NakedCandidates {
 	// The coordinates of the NakedCandidates on the SudokuBoard
 	public int x, y;
 	
+	// The unique id given to a NakedCandidates object
+	public int id;
+	
 	// Constructor creates a NakedCandidate object with a given size
 	// Size is derived from the dimensions of the Sudoku Board
 	public NakedCandidates(int size) {
