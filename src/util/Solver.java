@@ -275,22 +275,22 @@ public class Solver {
 				int x = comparator.x, y = comparator.y;
 				if (x == current.x || y == current.y || sameSection(current, comparator)) {
 					
-					if (checkForNakedQuads(current, comparator)) {
-						System.out.println("Matched the Naked Quad Profile set by candidates at ("+x+", "+y+")");
-						displayValues(new String("Candidates at ("+current.x+", "+current.y+")"), current.values);
-						displayValues(new String("Comparator Candidates at ("+x+", "+y+")"), comparator.values);
-						nakedQuads.add(comparator);
-						values.add(comparator.id);
-						System.out.println("");
-						System.out.println("");
-						solvable = nakedQuadSolver(nakedQuads, values, index+1);
-						System.out.println("NAKEDQUADSOLVER UNRAVELED A LEVEL");
-					}
-					else {
-						displayValues(new String("Candidates at ("+current.x+", "+current.y+")"), current.values);
-						System.out.println("Does not match the set Naked Quad Profile");
+				//	if (checkForNakedQuads(current, comparator)) {
+					System.out.println("Matched the Naked Quad Profile set by candidates at ("+x+", "+y+")");
+					displayValues(new String("Candidates at ("+current.x+", "+current.y+")"), current.values);
+					displayValues(new String("Comparator Candidates at ("+x+", "+y+")"), comparator.values);
+					nakedQuads.add(comparator);
+					values.add(comparator.id);
+					System.out.println("Adding to nakedQuads. Current Capacity: " + nakedQuads.size());
+					System.out.println("Adding the Naked Candidate with id " + current.id + " to the values list");
+					solvable = nakedQuadSolver(nakedQuads, values, index+1);
+					System.out.println("NAKEDQUADSOLVER UNRAVELED A LEVEL");
+				//	}
+				//	else {
+				//		displayValues(new String("Candidates at ("+current.x+", "+current.y+")"), current.values);
+				//		System.out.println("Does not match the set Naked Quad Profile");
 						displayValues(new String("Current Candidates ("+x+", "+y+")"), comparator.values);
-					}
+				//	}
 				}
 				else {
 					displayValues(new String("Candidates at ("+current.x+", "+current.y+")"), current.values);
@@ -331,7 +331,7 @@ public class Solver {
 						}
 					}
 					
-					if (mockCandidate.values.size() == 4 && confirmNakedQuads(nakedQuads)) {
+					if (mockCandidate.values.size() == 4 /*&& confirmNakedQuads(nakedQuads)*/) {
 						System.out.println("NAKED QUADS ARE CONFIRMED!!!!");
 						displayValues(new String("MockCandidateValues"), mockCandidate.values);
 						removeAffectedCandidates(mockCandidate, values, sameRow, sameColumn, sameSection);
@@ -376,7 +376,16 @@ public class Solver {
 				: 
 				solvable;
 	}
+/*	
+	private boolean checkForNakedQuads(NakedCandidates c1, NakedCandidates c2) {
+		
+		
+	}
 	
+	private boolean confirmNakedQuads(LinkedList<NakedCandidates> nakedQuads) {
+		
+	}
+*/	
 	private boolean checkForNakedTriples(NakedCandidates c1, NakedCandidates c2) {
 		
 		boolean compare3_2=false, compare3_3=false, compare2_2=false, compare2_3=false, matches=false;
