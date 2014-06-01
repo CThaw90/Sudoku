@@ -46,15 +46,17 @@ public class Solver {
 		}
 
 		extractCandidates();
+		groupCandidates();
 		
 		// The Sudoku Solvers iterate with proportion to the board size
-		for (int i=0; i < board.size && !solved; i++) {
-			solved = (solved) ? solved : nakedSingleSolver();
-			solved = (solved) ? solved : nakedPairSolver();
-			solved = (solved) ? solved : nakedTripleSolver(new LinkedList<NakedCandidates>(), new LinkedList<Integer>(), 0);
+	//	for (int i=0; i < board.size && !solved; i++) {
+		//	solved = (solved) ? solved : nakedSingleSolver();
+		//	solved = (solved) ? solved : nakedPairSolver();
+		//	solved = (solved) ? solved : nakedTripleSolver(new LinkedList<NakedCandidates>(), new LinkedList<Integer>(), 0);
 			solved = (solved) ? solved : nakedQuadSolver(new LinkedList<NakedCandidates>(), new LinkedList<Integer>(), 0);
+		//	solved = (solved) ? solved : bruteForceSolver(0);
 			System.out.println("======= SOLVER LOOPED =======");
-		}
+	//	}
 		
 	//	solved = (solved) ? solved : bruteForceSolver(0);
 		
@@ -252,12 +254,12 @@ public class Solver {
 	}
 	
 	private boolean nakedQuadSolver(LinkedList<NakedCandidates> nakedQuads, LinkedList<Integer> values, int index) {
-		
+		System.out.println("______NAKED QUAD SOLVER______");
 		boolean solvable = false;
 		
 		for (/* index */ ; index < nakeds.size() && !solvable; index++) {
 			NakedCandidates current = nakeds.get(index);
-			if (current.values.size() > 1 && current.values.size() <= 4 && nakedQuads.size() == 0) {
+			if (current.values.size() <= 4 && nakedQuads.size() == 0) {
 				int x = current.x, y = current.y;
 				displayValues(new String("Candidates at "+x+", "+y+")"), current.values);
 				System.out.println("Match the initial set Naked Quad Profile");
@@ -265,41 +267,15 @@ public class Solver {
 				System.out.println("Adding to Naked Quads. Current capacity: " + nakedQuads.size());
 				System.out.println("Adding the Naked Candidate id " + current.id + " to value lists");
 				values.add(current.id);
-				
 				solvable = nakedQuadSolver(nakedQuads, values, index+1);
 				System.out.println("NAKEDQUADSOLVER COMPLETELY UNRAVELED");
-			}
-			
-			else if (current.values.size() > 1 && current.values.size() <= 4 && !passOver(values, nakeds.get(index).id)) {
-				NakedCandidates comparator = nakedQuads.get(0);
-				int x = comparator.x, y = comparator.y;
-				if (x == current.x || y == current.y || sameSection(current, comparator)) {
-					
-				//	if (checkForNakedQuads(current, comparator)) {
-					System.out.println("Matched the Naked Quad Profile set by candidates at ("+x+", "+y+")");
-					displayValues(new String("Candidates at ("+current.x+", "+current.y+")"), current.values);
-					displayValues(new String("Comparator Candidates at ("+x+", "+y+")"), comparator.values);
-					nakedQuads.add(comparator);
-					values.add(comparator.id);
-					System.out.println("Adding to nakedQuads. Current Capacity: " + nakedQuads.size());
-					System.out.println("Adding the Naked Candidate with id " + current.id + " to the values list");
-					solvable = nakedQuadSolver(nakedQuads, values, index+1);
-					System.out.println("NAKEDQUADSOLVER UNRAVELED A LEVEL");
-				//	}
-				//	else {
-				//		displayValues(new String("Candidates at ("+current.x+", "+current.y+")"), current.values);
-				//		System.out.println("Does not match the set Naked Quad Profile");
-						displayValues(new String("Current Candidates ("+x+", "+y+")"), comparator.values);
-				//	}
-				}
-				else {
-					displayValues(new String("Candidates at ("+current.x+", "+current.y+")"), current.values);
-					System.out.println("Does not match the set Naked Quad Profile");
-					displayValues(new String("Current Candidates ("+x+", "+y+")"), comparator.values);
-				}
+				
 			}
 			
 			else if (values.size() == 4) {
+				System.out.println("FOUND A NAKED QUAD POSSIBILITY!!!!!");
+
+			/* */
 				boolean sameRow = (nakedQuads.get(0).x == nakedQuads.get(1).x &&
 								   nakedQuads.get(0).x == nakedQuads.get(2).x &&
 								   nakedQuads.get(0).x == nakedQuads.get(3).x );
@@ -312,13 +288,21 @@ public class Solver {
 									   sameSection(nakedQuads.get(0), nakedQuads.get(2)) &&
 									   sameSection(nakedQuads.get(0), nakedQuads.get(3)) );
 				
+				if (sameRow) { System.out.println("NAKED QUADS ARE ALL IN THE SAME ROW"); }
+				else if (sameColumn) { System.out.println("NAKED QUADS ARE ALL IN THE SAME COLUMN"); }
+				if (sameSection) { System.out.println("NAKED QUADS ARE ALL IN THE SAME SECTION"); }
+				
+				if (!sameRow && !sameColumn && sameSection) {
+					System.out.println("THIS IS NOT A VALID NAKED QUAD GROUP");
+				}
+
 				if (sameRow || sameColumn || sameSection) {
-					System.out.println("THE NAKED QUADS!!!!");
+					System.out.println("THE NAKED QUADS ARE CONFIRMED!!!!");
 					for (int i=0; i < nakedQuads.size(); i++) {
 						NakedCandidates display = nakedQuads.get(i);
 						displayValues(new String("Candidates at ("+display.x+", "+display.y+")"), display.values);
 					}
-					
+				/* */	
 					NakedCandidates mockCandidate = new NakedCandidates(board.size*board.size);
 					mockCandidate.x = nakedQuads.get(0).x;
 					mockCandidate.y = nakedQuads.get(0).y;
@@ -331,17 +315,41 @@ public class Solver {
 						}
 					}
 					
-					if (mockCandidate.values.size() == 4 /*&& confirmNakedQuads(nakedQuads)*/) {
-						System.out.println("NAKED QUADS ARE CONFIRMED!!!!");
-						displayValues(new String("MockCandidateValues"), mockCandidate.values);
-						removeAffectedCandidates(mockCandidate, values, sameRow, sameColumn, sameSection);
-						solvable = true;
-						// return true;
-					}
+					displayValues(new String("MockCandidateValues"), mockCandidate.values);
+					removeAffectedCandidates(mockCandidate, values, sameRow, sameColumn, sameSection);
+					solvable = true;
+				}
+			
+			}
+			
+			else if (current.values.size() <= 4 && !passOver(values, nakeds.get(index).id)) {
+				System.out.println("Entered Current Naked Quad value is less than or equal to 4 with PassOver check");
+				NakedCandidates comparator = nakedQuads.get(0);
+				int x = comparator.x, y = comparator.y;
+				if ((x == current.x || y == current.y || sameSection(current, comparator)) && checkForNakedQuads(nakedQuads, current)) {
+					
+					System.out.println("Matched the Naked Quad Profile set by candidates at ("+x+", "+y+")");
+					displayValues(new String("Candidates at ("+current.x+", "+current.y+")"), current.values);
+					displayValues(new String("Comparator Candidates at ("+x+", "+y+")"), comparator.values);
+					nakedQuads.add(current);
+					values.add(current.id);
+					
+					System.out.println("Adding to nakedQuads. Current Capacity: " + nakedQuads.size());
+					System.out.println("Adding the Naked Candidate with id " + current.id + " to the values list");
+
+				//	return true; /* FORCED CODE BREAK FOR DEBUGGING PURPOSES */
+					solvable = nakedQuadSolver(nakedQuads, values, index+1);
+					System.out.println("NAKEDQUADSOLVER UNRAVELED A LEVEL");
+				}
+				else {
+					displayValues(new String("Candidates at ("+current.x+", "+current.y+")"), current.values);
+					System.out.println("Does not match the set Naked Quad Profile");
+					displayValues(new String("Current Candidates ("+x+", "+y+")"), comparator.values);
 				}
 			}
 			
 			else if (nakedQuads.size() > 0) {
+				System.out.println("Entered Naked Quads size is greater than 0");
 				NakedCandidates comparator = nakedQuads.get(0);
 				displayValues(new String("Candidates at ("+current.x+", "+current.y+")"), current.values);
 				System.out.println("Does not match the NakedQuads Profile");
@@ -366,26 +374,43 @@ public class Solver {
 			values.remove(values.size()-1);
 			nakedQuads.remove(i);
 			if (!solvable) { return solvable; };
-			return solvable;
-			
 		}
 		
 		System.out.println("Invoking Naked Triple Solver from Quad Solver with " + nakedQuads.size() + " Naked Quads");
-		return (solvable) ? 
+		
+		return (solvable && nakedQuads.size() == 0) ? 
 				nakedTripleSolver(new LinkedList<NakedCandidates>(), new LinkedList<Integer>(), 0) 
 				: 
 				solvable;
 	}
-/*	
-	private boolean checkForNakedQuads(NakedCandidates c1, NakedCandidates c2) {
-		
-		
-	}
 	
-	private boolean confirmNakedQuads(LinkedList<NakedCandidates> nakedQuads) {
+	private boolean checkForNakedQuads(LinkedList<NakedCandidates> pool, NakedCandidates comparator) {
 		
+		LinkedList<String> candidates = new LinkedList<String>();
+		for (int i=0; i < pool.size(); i++) {
+			displayValues("Concatenating Candidates", pool.get(i).values);
+		}
+		
+		displayValues("With Candidates", comparator.values);
+		System.out.println("Pool Size is " + pool.size());
+		for (int index=0; index < pool.size(); index++) {
+			for (int i=0; i < pool.get(index).values.size(); i++) {
+				if (!passOver(candidates, pool.get(index).values.get(i))) {
+					candidates.add(pool.get(index).values.get(i));
+				}
+			}
+		}
+		
+		for (int index=0; index < comparator.values.size(); index++) {
+			if (!passOver(candidates, comparator.values.get(index))) {
+				candidates.add(comparator.values.get(index));
+			}
+		}
+		
+		displayValues(new String("NAKED QUAD CANDIDATES"), candidates);
+		return candidates.size() <= 4;
 	}
-*/	
+
 	private boolean checkForNakedTriples(NakedCandidates c1, NakedCandidates c2) {
 		
 		boolean compare3_2=false, compare3_3=false, compare2_2=false, compare2_3=false, matches=false;
