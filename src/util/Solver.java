@@ -48,17 +48,8 @@ public class Solver {
 		extractCandidates();
 		groupCandidates();
 		
-		// The Sudoku Solvers iterate with proportion to the board size
-	//	for (int i=0; i < board.size && !solved; i++) {
-		//	solved = (solved) ? solved : nakedSingleSolver();
-		//	solved = (solved) ? solved : nakedPairSolver();
-		//	solved = (solved) ? solved : nakedTripleSolver(new LinkedList<NakedCandidates>(), new LinkedList<Integer>(), 0);
-			solved = (solved) ? solved : nakedQuadSolver(new LinkedList<NakedCandidates>(), new LinkedList<Integer>(), 0);
-		//	solved = (solved) ? solved : bruteForceSolver(0);
-			System.out.println("======= SOLVER LOOPED =======");
-	//	}
-		
-	//	solved = (solved) ? solved : bruteForceSolver(0);
+		solved = (solved) ? solved : nakedQuadSolver(new LinkedList<NakedCandidates>(), new LinkedList<Integer>(), 0);
+		solved = (solved) ? solved : bruteForceSolver(0);
 		
 		System.out.println(solved ? SOLVED : UNSOLVED);
 	}
@@ -217,7 +208,6 @@ public class Solver {
 						displayValues("MockCandidateValues", mockCandidate.values);
 						removeAffectedCandidates(mockCandidate, values, sameRow, sameColumn, sameSection);
 						solvable = true;
-					//	return true;
 					}
 				}
 			}
@@ -246,7 +236,6 @@ public class Solver {
 			values.remove(values.size()-1);
 			System.out.println("UNWINDING RECURSION");
 			if (!solvable) { return solvable; }
-			// return solvable;
 		}
 		
 		System.out.println("Invoking Naked Pair Solver from Triple Solver with " + nakedTriples.size() + " Naked Triples");
