@@ -47,14 +47,9 @@ public class Solver {
 
 		extractCandidates();
 		
-		// The Sudoku Solvers iterate with proportion to the board size
-		for (int i=0; i < board.size; i++) {
-			solved = (solved) ? solved : nakedSingleSolver();
-			solved = (solved) ? solved : nakedPairSolver();
-			solved = (solved) ? solved : bruteForceSolver(0);
-			solved = (solved) ? solved : nakedTripleSolver(new LinkedList<NakedCandidates>(), new LinkedList<Integer>(), 0);
-		}
-		
+		solved = (solved) ? solved : nakedQuadSolver(new LinkedList<NakedCandidates>(), new LinkedList<Integer>(), 0);
+		if (!solved) { System.out.println("-- Using the Brute Force Solver --"); }
+		solved = (solved) ? solved : bruteForceSolver(0);
 		
 		System.out.println(solved ? SOLVED : UNSOLVED);
 	}
@@ -84,7 +79,6 @@ public class Solver {
 	private boolean nakedSingleSolver() {
 		
 		boolean solvable = true;
-		
 		while (nakeds.size() > 0 && solvable) {
 			
 			solvable = false;
@@ -95,14 +89,13 @@ public class Solver {
 				if (candidate.values.size() == 1) {
 					nakeds.remove(i);
 					board.setValue(candidate.x, candidate.y, candidate.values.get(0));
-					System.out.println("Setting Value " + candidate.values.getFirst() + " at " + candidate.x + ", " + candidate.y);
 					removeAffectedCandidates(candidate);
 					solvable = true;
 				} 
 				else { i++; }
 			}
 		}
-		
+
 		return solvable;
 	}
 	
@@ -114,11 +107,11 @@ public class Solver {
 		LinkedList<Integer> values = new LinkedList<Integer>();
 		for (int index=0; index < nakeds.size(); index++) {
 			NakedCandidates current = nakeds.get(index);
-			if (current.values.size() == 2 && !passOver(values, index)) {
-				System.out.println("Possible Pair Candidate found at " + current.x + ", " + current.y);
-				displayValues("Current Values", current.values);
+			if (current.values.size() == 2 && !passOver(values, nakeds.get(index).id)) { /* Modified to check for Candidate Unique Id */
 				int j = checkForNakedPairs(current.x, current.y, index);
-				values.add(j);
+				
+				// Ensure Index of -1 doesn't get added to the list of Cached Values.
+				if (j != -1) { values.add(nakeds.get(j).id); } /* Modified to cache Candidate unique Id */
 			}
 		}
 		
@@ -131,19 +124,20 @@ public class Solver {
 		for (/* index */; index < nakeds.size() && !solvable; index++) {
 			NakedCandidates current = nakeds.get(index);
 
-			if ((current.values.size() == 2 || current.values.size() == 3) && !passOver(values, index) && nakedTriples.size() == 0) {
+			if ((current.values.size() == 2 || current.values.size() == 3) && !passOver(values, nakeds.get(index).id) && nakedTriples.size() == 0) {
 				nakedTriples.add(current);
-				values.add(index);
+				values.add(current.id);
+
 				solvable = nakedTripleSolver(nakedTriples, values, index+1);
 			}
 			
-			else if ((current.values.size() == 2 || current.values.size() == 3) && !passOver(values, index)) {
+			else if ((current.values.size() == 2 || current.values.size() == 3) && !passOver(values, nakeds.get(index).id)) {
 				NakedCandidates comparator = nakedTriples.get(0);
-
 				if (comparator.x == current.x || comparator.y == current.y || sameSection(nakedTriples.get(0), current)) {
 					
 					if (checkForNakedTriples(comparator, current)) {
 						nakedTriples.add(current);
+						values.add(current.id);
 						solvable = nakedTripleSolver(nakedTriples, values, index+1);
 					}
 				}
@@ -161,9 +155,7 @@ public class Solver {
 				
 				if (sameRow || sameColumn || sameSection) {
 
-
 					if (confirmNakedTriples(nakedTriples)) {
-
 						NakedCandidates mockCandidate = new NakedCandidates(board.size*board.size);
 						mockCandidate.x = nakedTriples.get(0).x;
 						mockCandidate.y = nakedTriples.get(0).y;
@@ -176,8 +168,8 @@ public class Solver {
 							}
 						}
 
-						removeAffectedCandidates(mockCandidate, sameRow, sameColumn, sameSection);
-						return true;
+						removeAffectedCandidates(mockCandidate, values, sameRow, sameColumn, sameSection);
+						solvable = true;
 					}
 				}
 			}
@@ -185,11 +177,109 @@ public class Solver {
 		
 		if (nakedTriples.size() != 0) {
 			nakedTriples.remove(nakedTriples.size()-1);
+			values.remove(values.size()-1);
+			if (!solvable) { return solvable; }
 		}
-		
-		return nakedPairSolver();
+
+		return (values.size() > 0) ? solvable : nakedPairSolver();
 	}
 	
+	private boolean nakedQuadSolver(LinkedList<NakedCandidates> nakedQuads, LinkedList<Integer> values, int index) {
+
+		boolean solvable = false;
+		
+		for (/* index */ ; index < nakeds.size() && !solvable; index++) {
+			NakedCandidates current = nakeds.get(index);
+			if (current.values.size() <= 4 && nakedQuads.size() == 0) {
+				
+				nakedQuads.add(current);
+				values.add(current.id);
+				solvable = nakedQuadSolver(nakedQuads, values, index+1);
+			}
+			
+			else if (values.size() == 4) {
+
+				boolean sameRow = (nakedQuads.get(0).x == nakedQuads.get(1).x &&
+								   nakedQuads.get(0).x == nakedQuads.get(2).x &&
+								   nakedQuads.get(0).x == nakedQuads.get(3).x );
+				
+				boolean sameColumn = (nakedQuads.get(0).y == nakedQuads.get(1).y &&
+									  nakedQuads.get(0).y == nakedQuads.get(2).y &&
+									  nakedQuads.get(0).y == nakedQuads.get(3).y );
+				
+				boolean sameSection = (sameSection(nakedQuads.get(0), nakedQuads.get(1)) &&
+									   sameSection(nakedQuads.get(0), nakedQuads.get(2)) &&
+									   sameSection(nakedQuads.get(0), nakedQuads.get(3)) );
+				
+				if (sameRow || sameColumn || sameSection) {
+
+					NakedCandidates mockCandidate = new NakedCandidates(board.size*board.size);
+					mockCandidate.x = nakedQuads.get(0).x;
+					mockCandidate.y = nakedQuads.get(0).y;
+					
+					for (int i=0; i < nakedQuads.size(); i++) {
+						for (int j=0; j < nakedQuads.get(i).values.size(); j++) {
+							if (!passOver(mockCandidate.values, nakedQuads.get(i).values.get(j))) {
+								mockCandidate.values.add(nakedQuads.get(i).values.get(j));
+							}
+						}
+					}
+					
+					removeAffectedCandidates(mockCandidate, values, sameRow, sameColumn, sameSection);
+					solvable = true;
+				}
+			
+			}
+			
+			else if (current.values.size() <= 4 && !passOver(values, nakeds.get(index).id)) {
+
+				NakedCandidates comparator = nakedQuads.get(0);
+				int x = comparator.x, y = comparator.y;
+				if ((x == current.x || y == current.y || sameSection(current, comparator)) && checkForNakedQuads(nakedQuads, current)) {
+					
+					nakedQuads.add(current);
+					values.add(current.id);
+
+					solvable = nakedQuadSolver(nakedQuads, values, index+1);
+				}
+			}
+			
+		}
+
+		if (nakedQuads.size() != 0) {
+			int i=nakedQuads.size()-1;
+			values.remove(values.size()-1);
+			nakedQuads.remove(i);
+			if (!solvable) { return solvable; };
+		}
+
+		return (solvable && nakedQuads.size() == 0) ? 
+				nakedTripleSolver(new LinkedList<NakedCandidates>(), new LinkedList<Integer>(), 0) 
+				: 
+				solvable;
+	}
+	
+	private boolean checkForNakedQuads(LinkedList<NakedCandidates> pool, NakedCandidates comparator) {
+		
+		LinkedList<String> candidates = new LinkedList<String>();
+
+		for (int index=0; index < pool.size(); index++) {
+			for (int i=0; i < pool.get(index).values.size(); i++) {
+				if (!passOver(candidates, pool.get(index).values.get(i))) {
+					candidates.add(pool.get(index).values.get(i));
+				}
+			}
+		}
+		
+		for (int index=0; index < comparator.values.size(); index++) {
+			if (!passOver(candidates, comparator.values.get(index))) {
+				candidates.add(comparator.values.get(index));
+			}
+		}
+
+		return candidates.size() <= 4;
+	}
+
 	private boolean checkForNakedTriples(NakedCandidates c1, NakedCandidates c2) {
 		
 		boolean compare3_2=false, compare3_3=false, compare2_2=false, compare2_3=false, matches=false;
@@ -261,7 +351,7 @@ public class Solver {
 						   ||
 						   
 						   c1.values.get(1).equals(c3.values.get(0)) &&
-						   c1.values.get(2).equals(c3.values.get(2)) ));
+						   c1.values.get(2).equals(c3.values.get(1)) ));
 		}
 		
 		if (compare3_2_3) {
@@ -374,7 +464,7 @@ public class Solver {
 			if (!board.duplicateEntryColumn(candidate.y, candidate.values.get(i)) 
 					&& !board.duplicateEntryRow(candidate.x, candidate.values.get(i))
 					&& !board.duplicateEntrySection(candidate.x, candidate.y, candidate.values.get(i))) {
-				
+
 				board.setValue(candidate.x, candidate.y, candidate.values.get(i));
 				solvable = (index < nakeds.size()-1 ? bruteForceSolver(index+1) : board.isSolved());
 			}
@@ -389,9 +479,7 @@ public class Solver {
 	 * by an updated value to the SudokuBoard
 	 * @param  */
 	private void removeAffectedCandidates(NakedCandidates candidate) {
-		
-	//	System.out.println("Removing candidate at coordinate ("+candidate.x+", "+candidate.y+") with value " + candidate.values.get(0));
-		
+
 		int index=0;
 		while (index < nakeds.size()) {
 			NakedCandidates operator = nakeds.get(index);
@@ -414,28 +502,29 @@ public class Solver {
 			else { index++; }
 		}
 	}
-	
-	private void removeAffectedCandidates(NakedCandidates candidate, boolean sameRow, boolean sameColumn, boolean sameSection) {
+
+	private void removeAffectedCandidates(NakedCandidates candidate, LinkedList<Integer> nakedTriples, boolean sameRow, boolean sameColumn, boolean sameSection) {
 		
 		int index=0;
 		while (index < nakeds.size()) {
 			NakedCandidates operator = nakeds.get(index);
-			
-			if (sameRow && candidate.x == operator.x) {
-				deleteMatchingValues(candidate, operator);
+
+			if (sameRow && candidate.x == operator.x && !passOver(nakedTriples, operator.id)) { 
+				deleteMatchingValues(candidate, operator); 
 			}
 			
-			else if (sameColumn && candidate.y == operator.y) {
-				deleteMatchingValues(candidate, operator);
+			else if (sameColumn && candidate.y == operator.y && !passOver(nakedTriples, operator.id)) { 
+				deleteMatchingValues(candidate, operator); 
 			}
 			
-			if (sameSection && sameSection(candidate, operator)) {
-				deleteMatchingValues(candidate, operator);
+			if (sameSection && sameSection(candidate, operator) && !passOver(nakedTriples, operator.id)) { 
+				deleteMatchingValues(candidate, operator); 
 			}
 			
-			if (operator.values.size() == 0) {
-				nakeds.remove(index);
+			if (operator.values.size() == 0) { 
+				nakeds.remove(index); 
 			}
+			
 			else { index++; }
 		}
 	}
@@ -463,15 +552,6 @@ public class Solver {
 			passOver = (values.get(index).equals(value));
 		}
 		return passOver;
-	}
-	
-	private void displayValues(String title, LinkedList<String> values) {
-		
-		System.out.print(title + ":");
-		for (int i=0; i < values.size(); i++) {
-			System.out.print(" " + values.get(i));
-		}
-		System.out.println();
 	}
 	
 	/**
@@ -507,7 +587,7 @@ public class Solver {
 		boolean rp = (current.x == comparator.x ? true : false);
 		boolean sp = sameSection(current, comparator);
 		boolean removed = false;
-		
+
 		for (int index=0; index < nakeds.size() && (sp || cp || rp); index++) {
 			
 			if (!nakeds.get(index).equals(current) && !nakeds.get(index).equals(comparator)) {
@@ -564,9 +644,9 @@ public class Solver {
 	
 	/**
 	 * Extracts all the possible values available for an empty Sudoku cell 
-	 * and stores them in a NakedCandidate object dedicated to a coordinate*/
+	 * and stores them in a NakedCandidate object dedicated to a coordinate */
 	private void extractCandidates() {
-		
+
 		nakeds = new LinkedList<NakedCandidates>();
 		int length = board.size*board.size;
 		for (int x=0; x < length; x++) {
@@ -587,7 +667,8 @@ public class Solver {
 							candidate.values.add(String.valueOf(i));
 						}
 					}
-					
+
+					candidate.id = nakeds.size();
 					nakeds.add(candidate);
 				}
 			}
