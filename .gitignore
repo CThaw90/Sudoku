@@ -4,4 +4,5 @@
 /dist/*.txt
 /dist/*.TXT
 *.class
+*.sudoku
 
